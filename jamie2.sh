@@ -36,9 +36,10 @@ for i in "${applications[@]}"
     wait
 done
 
-#dock stuff
+
 defaults write com.apple.dock single-app -bool TRUE
 defaults write com.apple.dock orentation right
+osascript -e 'tell application "System Events" to tell appearance preferences to set dark mode to true'
 killall Dock
 
 exit 0

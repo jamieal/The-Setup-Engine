@@ -28,7 +28,7 @@ echo "Brew installed - ready to install applications"
 #array the apps
 
 #declare array
-declare -a applications=(visual-studio-code Spotify Discord Rectamble)
+declare -a applications=(visual-studio-code Spotify Discord Rectamble Iterm2)
 
 for i in "${applications[@]}"
   do  

@@ -1,6 +1,12 @@
 #!/bin/bash
 
 echo "Welcome to the installer"
+
+#check for running as root - 
+if [ "$(id -u)" -eq 0 ]; then
+  echo "This script should not be run with sudo or as root. Please run without sudo".
+  exit 1
+fi
 #check homebrew homebrew https://brew.sh/
 which -s brew
 if [[ $? != 0 ]] ; then

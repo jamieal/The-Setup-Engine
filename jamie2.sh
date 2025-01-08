@@ -1,12 +1,21 @@
 #!/bin/bash
 
-echo "Welcome to the installer"
 
-#check for running as root - 
+#if debug mode is on it will skip various steps like installing etc. 
+debugmode=on
+
+
+echo "Checking status of your computer"
+
+#check for running as root  
 if [ "$(id -u)" -eq 0 ]; then
   echo "This script should not be run with sudo or as root. Please run without sudo".
   exit 1
 fi
+
+#find user account
+loggedInUser=$( echo "show State:/Users/ConsoleUser" | scutil | awk '/Name :/ { print $3 }' )
+
 #check homebrew homebrew https://brew.sh/
 which -s brew
 if [[ $? != 0 ]] ; then
@@ -16,31 +25,33 @@ else
     #update homebrew  
     brew update
 fi
-
-wait 
 echo "homebrew command ran"
-#check chip architecture
-cpuArc="checking to see if Silicone"
+#check CPU 
+cpu="checking to see if Silicone"
 if [[ $(uname -p) == 'arm' ]]; then
-  cpuArc=$(uname -p)
-  echo "Detected $cpuArc processor, making change to path for brew"
-  echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> /Users/jcras/.zprofile
+  cpu=$(uname -p)
+  echo "Detected $cpu processor, making change to path for brew"
+  echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> /Users/$loggedInUser/.zprofile
   eval "$(/opt/homebrew/bin/brew shellenv)"
 fi
-echo "Brew installed - ready to install applications"
-#installing applications
-#check to see if these are installed 
-#change dock and put on right/hide
-#array the apps
+echo "Brew installed - ready to install applications."
+
+
+
+
 
 #declare array
 declare -a applications=(visual-studio-code Spotify Discord Rectamble Iterm2)
+echo "$(applications[*])"
 
-for i in "${applications[@]}"
-  do  
-    brew install cask "$i"
-    wait
-done
+if [[$debugmode=="off"]]; then
+  for i in "${applications[@]}"
+    do  
+      brew install cask "$i"
+      wait
+  done
+else
+  echo "Debug mode on, not installing apps. Applications declared to be installed $applications"
 
 
 defaults write com.apple.dock single-app -bool TRUE

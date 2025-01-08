@@ -42,21 +42,29 @@ echo "Brew installed - ready to install applications."
 
 #declare array
 declare -a applications=(visual-studio-code Spotify Discord Rectamble Iterm2)
-echo "$(applications[*])"
+echo "Array list: ${applications[*])}"
 
-if [[$debugmode=="off"]]; then
+
+if [[ $debugmode == "off" ]]; then
+  echo "debug mode is: $debugmode"
+  echo "Installing applications now"
   for i in "${applications[@]}"
     do  
       brew install cask "$i"
       wait
   done
 else
-  echo "Debug mode on, not installing apps. Applications declared to be installed $applications"
+  echo "Debug mode on, not installing apps. Applications declared to be installed $applications[@]"
+fi
 
-
+#writing 
+# turning on single-app mode
 defaults write com.apple.dock single-app -bool TRUE
 defaults write com.apple.dock orentation right
 osascript -e 'tell application "System Events" to tell appearance preferences to set dark mode to true'
+osascript -e 'tell application "System Events" to set picture of every desktop to "/System/Library/Desktop Pictures/Solid Colors/Black.png"'
 killall Dock
+
+
 
 exit 0

@@ -4,7 +4,6 @@
 #if debug mode is on it will skip various steps like installing etc. 
 debugmode=on
 
-
 echo "Checking status of your computer"
 
 #check for running as root  
@@ -23,7 +22,8 @@ if [[ $? != 0 ]] ; then
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 else
     #update homebrew  
-    brew update
+    brew upgrade
+    wait
 fi
 echo "homebrew command ran"
 #check CPU 
@@ -41,7 +41,7 @@ echo "Brew installed - ready to install applications."
 
 
 #declare array
-declare -a applications=(visual-studio-code Spotify Discord Rectamble Iterm2)
+declare -a applications=(visual-studio-code Spotify Discord Rectangle Iterm2 Karabiner-Elements)
 echo "Array list: ${applications[*])}"
 
 
@@ -65,6 +65,12 @@ osascript -e 'tell application "System Events" to tell appearance preferences to
 osascript -e 'tell application "System Events" to set picture of every desktop to "/System/Library/Desktop Pictures/Solid Colors/Black.png"'
 killall Dock
 
+#check if touch id is setup
+if [[ grep -q "auth\s*sufficient\s*pam_tid.so" /etc/pam.d/sudo_local ]]; then
+    echo "Touch ID for sudo is enabled."
+else
+    echo "Touch ID for sudo is not enabled."
+fi
 
 
 exit 0

@@ -95,6 +95,13 @@ osascript -e 'tell application "System Events" to tell appearance preferences to
 osascript -e 'tell application "System Events" to set picture of every desktop to "/System/Library/Desktop Pictures/Solid Colors/Black.png"'
 killall Dock
 
+#change date/time format to be 24hr
+defaults write NSGlobalDomain AppleICUForce24HourTime -bool true
+#change the date to D/M/Y
+defaults write NSGlobalDomain AppleICUDateFormatStrings -dict-add 1 "dd/MM/yyyy"
+#apply the configurations
+killall SystemUIServer
+
 #-----------------------
 # Touch ID Check for sudo
 #-----------------------

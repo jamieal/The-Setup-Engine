@@ -1,7 +1,15 @@
 #!/bin/bash
 
+
+#-----------------------
+# Declaring variables
+#-----------------------
+
 # If debug mode is on it will skip various steps like installing etc.
 debugmode=on
+# Find the logged-in user
+loggedInUser=$( echo "show State:/Users/ConsoleUser" | scutil | awk '/Name :/ { print $3 }' )
+
 
 echo "Checking status of your computer"
 
@@ -26,8 +34,7 @@ if [ "$(id -u)" -eq 0 ]; then
   exit 1
 fi
 
-# Find the logged-in user
-loggedInUser=$( echo "show State:/Users/ConsoleUser" | scutil | awk '/Name :/ { print $3 }' )
+
 
 # Check for Homebrew (https://brew.sh/)
 if ! command -v brew &> /dev/null; then
@@ -52,12 +59,14 @@ echo "Brew installed - ready to install applications."
 # Download the iTerm2 plist file from GitHub to the logged-in user's Desktop
 #-----------------------
 PLIST_URL="https://raw.githubusercontent.com/jamieal/iTerm-Config/refs/heads/main/com.googlecode.iterm2.plist"
-DESTINATION="/Users/$loggedInUser/Desktop/com.googlecode.iterm2.plist"
+DESTINATION="~/Library/Preferences/"
 echo "Downloading iTerm2 configuration plist file to $DESTINATION..."
 curl -L "$PLIST_URL" -o "$DESTINATION"
 
 if [[ -f "$DESTINATION" ]]; then
     echo "Download successful: $DESTINATION"
+    cd $DESTINATION
+    defaults read com.googlecode.iterm2
 else
     echo "Download failed!"
 fi
@@ -101,7 +110,8 @@ defaults write NSGlobalDomain AppleICUForce24HourTime -bool true
 defaults write NSGlobalDomain AppleICUDateFormatStrings -dict-add 1 "dd/MM/yyyy"
 #apply the configurations
 killall SystemUIServer
-
+#install zsh
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 #-----------------------
 # Touch ID Check for sudo
 #-----------------------

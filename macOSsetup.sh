@@ -116,9 +116,20 @@ sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/too
 # Touch ID Check for sudo
 #-----------------------
 if grep -q "auth\s*sufficient\s*pam_tid.so" /etc/pam.d/sudo_local; then
-    echo "Touch ID for sudo is enabled."
+    echo "Touch ID for sudo is enabled. (sudo_local)"
 else
-    echo "Touch ID for sudo is not enabled."
+    echo "Touch ID for sudo is not enabled in sudo_local. Checking /etc/pam.d/sudo..."
+    if grep -q "^auth sufficient pam_tid.so" /etc/pam.d/sudo; then
+        echo "Touch ID for sudo is already enabled in /etc/pam.d/sudo."
+    else
+        echo "Enabling Touch ID for sudo by adding 'auth sufficient pam_tid.so' to /etc/pam.d/sudo."
+        sudo sed -i '' '1s;^;auth sufficient pam_tid.so\n;' /etc/pam.d/sudo
+        if grep -q "^auth sufficient pam_tid.so" /etc/pam.d/sudo; then
+            echo "Touch ID for sudo has been enabled."
+        else
+            echo "Failed to enable Touch ID for sudo. Please check permissions."
+        fi
+    fi
 fi
 
 exit 0

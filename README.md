@@ -1,6 +1,6 @@
-# macOS Setup Script
+# The Setup Engine
 
-This is Automated setup script for new macOS installations. It installs your essential applications, configures system settings, and sets up personalized wallpapers from AWS S3.
+This is Automated setup script and workflow for new macOS installations. It installs your essential applications, configures system settings, and sets up personalized wallpapers from AWS S3.
 
 ## Features
 

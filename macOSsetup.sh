@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# macOS Setup Script
+# Written by Jamie Cras
+# Version: 1.0
 
 #-----------------------
 # Declaring variables
@@ -9,10 +12,6 @@
 debugmode=on
 # Find the logged-in user
 loggedInUser=$( echo "show State:/Users/ConsoleUser" | scutil | awk '/Name :/ { print $3 }' )
-
-
-echo "Checking status of your computer"
-
 
 echo "Are you running in debug mode? Say Y or N"
 read debugModePrompt
@@ -27,14 +26,11 @@ else
   exit 1
 fi
 
-
 # Check if running as root  
 if [ "$(id -u)" -eq 0 ]; then
   echo "This script should not be run with sudo or as root. Please run without sudo."
   exit 1
 fi
-
-
 
 # Check for Homebrew (https://brew.sh/)
 if ! command -v brew &> /dev/null; then
@@ -54,22 +50,6 @@ if [[ $(uname -p) == 'arm' ]]; then
   eval "$(/opt/homebrew/bin/brew shellenv)"
 fi
 echo "Brew installed - ready to install applications."
-
-#-----------------------
-# Download the iTerm2 plist file from GitHub to the logged-in user's Desktop
-#-----------------------
-PLIST_URL="https://raw.githubusercontent.com/jamieal/iTerm-Config/refs/heads/main/com.googlecode.iterm2.plist"
-DESTINATION="~/Library/Preferences/"
-echo "Downloading iTerm2 configuration plist file to $DESTINATION..."
-curl -L "$PLIST_URL" -o "$DESTINATION"
-
-if [[ -f "$DESTINATION" ]]; then
-    echo "Download successful: $DESTINATION"
-    cd $DESTINATION
-    defaults read com.googlecode.iterm2
-else
-    echo "Download failed!"
-fi
 
 #-----------------------
 # Application Installation
@@ -92,6 +72,23 @@ else
 fi
 
 #-----------------------
+# Download the iTerm2 plist file from GitHub to the logged-in user's Desktop
+#-----------------------
+PLIST_URL="https://raw.githubusercontent.com/jamieal/iTerm-Config/refs/heads/main/com.googlecode.iterm2.plist"
+DESTINATION="~/Library/Preferences/"
+
+# download iTerm2 config
+echo "Downloading iTerm2 configuration plist file to $DESTINATION..."
+curl -L "$PLIST_URL" -o "$DESTINATION"
+if [[ -f "$DESTINATION" ]]; then
+    echo "Download successful: $DESTINATION"
+    cd $DESTINATION
+    defaults read com.googlecode.iterm2
+else
+    echo "Download failed!"
+fi
+
+#-----------------------
 # System Settings
 #-----------------------
 
@@ -104,14 +101,15 @@ osascript -e 'tell application "System Events" to tell appearance preferences to
 osascript -e 'tell application "System Events" to set picture of every desktop to "/System/Library/Desktop Pictures/Solid Colors/Black.png"'
 killall Dock
 
-#change date/time format to be 24hr
+# Change date/time format to be 24hr
 defaults write NSGlobalDomain AppleICUForce24HourTime -bool true
-#change the date to D/M/Y
+# Change the date to D/M/Y
 defaults write NSGlobalDomain AppleICUDateFormatStrings -dict-add 1 "dd/MM/yyyy"
-#apply the configurations
+# Apply the configurations
 killall SystemUIServer
-#install zsh
+# Install zsh
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+
 #-----------------------
 # Touch ID Check for sudo
 #-----------------------

@@ -2,7 +2,7 @@
 
 # macOS Setup Script
 # Written by Jamie Cras
-# Version: 1.1
+# Version: 1.2
 
 #-----------------------
 # Declaring variables
@@ -12,9 +12,10 @@
 debugmode=on
 # Get logged in user
 loggedInUser=$( echo "show State:/Users/ConsoleUser" | scutil | awk '/Name :/ { print $3 }' )
-
+USER_HOME=$(dscl . -read /Users/"$loggedInUser" NFSHomeDirectory | awk '{print $2}')
 # Use AppleScript dialog instead of echo/read
 debugModePrompt=$(osascript -e 'display dialog "Are you running in debug mode?" buttons {"No", "Yes"} default button "Yes"' -e 'button returned of result' 2>/dev/null)
+SCREENSHOTS_DIR="$USER_HOME/Desktop/Screenshots"
 
 # Check if dialog was actually cancelled (Escape key or Command+.)
 if [ $? -ne 0 ]; then
@@ -37,6 +38,37 @@ fi
 if [ "$(id -u)" -eq 0 ]; then
   echo "This script should not be run with sudo or as root. Please run without sudo."
   exit 1
+fi
+
+#-----------------------
+# Screenshot Directory Setup
+#-----------------------
+
+echo "Setting up screenshot directory for user: $loggedInUser"
+
+# Create the Screenshots directory if it doesn't exist
+if [ ! -d "$SCREENSHOTS_DIR" ]; then
+    if [[ $debugmode == "off" ]]; then
+        mkdir -p "$SCREENSHOTS_DIR"
+        echo "✓ Created Screenshots directory: $SCREENSHOTS_DIR"
+    else
+        echo "Debug mode: Would create Screenshots directory: $SCREENSHOTS_DIR"
+    fi
+else
+    echo "✓ Screenshots directory already exists: $SCREENSHOTS_DIR"
+fi
+
+# Set proper ownership of the directory and configure screenshot location
+if [[ $debugmode == "off" ]]; then
+    chown "$loggedInUser:staff" "$SCREENSHOTS_DIR"
+    echo "✓ Set ownership of Screenshots directory"
+    
+    # Configure macOS to save screenshots to the new directory
+    defaults write com.apple.screencapture location "$SCREENSHOTS_DIR"
+    killall SystemUIServer 2>/dev/null || true
+    echo "✓ Configured screenshot save location to: $SCREENSHOTS_DIR"
+else
+    echo "Debug mode: Would set ownership and configure screenshot location"
 fi
 
 # Check for Homebrew (https://brew.sh/)
@@ -136,6 +168,18 @@ if [[ $debugmode == "off" ]]; then
 else
     echo "Debug mode: Would configure dock and enable dark mode"
 fi
+
+#-----------------------
+# Configure Menu Bar
+#-----------------------
+
+#configures sound to go into the menu bar. 
+defaults -currentHost write com.apple.controlcenter Sound -int 18
+#configures bluetooth to go into the menu bar.
+defaults -currentHost write com.apple.controlcenter Bluetooth -int 18
+
+
+
 
 #-----------------------
 # Download and set desktop wallpaper
@@ -258,4 +302,6 @@ else
 fi
 
 echo "Setup complete!"
+echo "Screenshots will now be saved to: $SCREENSHOTS_DIR"
+echo "You can test this by taking a screenshot (Cmd+Shift+3 or Cmd+Shift+4)"
 exit 0

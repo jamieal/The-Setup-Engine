@@ -11,7 +11,21 @@ import SwiftUI
 struct The_Setup_EngineApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            SetupContainerView()
+        }
+        .windowStyle(.hiddenTitleBar)
+        .windowResizability(.contentSize)
+        .defaultSize(width: 880, height: 660)
+        .commands {
+            AppCommands()
+
+            CommandGroup(after: .windowArrangement) {
+                Button("Find App…") { AppShortcuts.shared.quickSearchOpen = true }
+                    .keyboardShortcut("k", modifiers: .command)
+            }
+            #if DEBUG
+            DebugCommands(state: DebugState.shared)
+            #endif
         }
     }
 }

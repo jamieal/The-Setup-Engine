@@ -20,3 +20,6 @@ build/
 
 # Logs
 *.log
+
+# Private notes (kept local — see NOTES.md)
+NOTES.md

@@ -1,7 +1,8 @@
 import AppKit
 import SwiftUI
 
-/// All non-debug menu items: customised About, Help → Collect Logs, Reveal Logs, GitHub link.
+/// All non-debug menu items: customised About, File → Collect Logs / Reveal Logs,
+/// Help → GitHub / Report Issue.
 struct AppCommands: Commands {
     var body: some Commands {
         // About panel — replace default to inject our credits / repo link.
@@ -14,8 +15,9 @@ struct AppCommands: Commands {
             }
         }
 
-        // Help menu — diagnostics + project link.
-        CommandGroup(replacing: .help) {
+        // File menu — diagnostic actions live here for visibility.
+        CommandGroup(after: .newItem) {
+            Divider()
             Button("Collect Diagnostic Logs…") {
                 collectAndRevealLogs()
             }
@@ -25,8 +27,14 @@ struct AppCommands: Commands {
                 revealLogsFolder()
             }
 
-            Divider()
+            Button("Save Window Snapshot to Desktop") {
+                saveSnapshot()
+            }
+            .keyboardShortcut("s", modifiers: [.command, .shift])
+        }
 
+        // Help menu — project links only.
+        CommandGroup(replacing: .help) {
             Link("View on GitHub",
                  destination: URL(string: "https://github.com/jamieal/The-Setup-Engine")!)
             Link("Report an Issue",
@@ -76,5 +84,12 @@ struct AppCommands: Commands {
         // Make sure the folder exists before revealing it.
         try? FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
         NSWorkspace.shared.activateFileViewerSelecting([folder])
+    }
+
+    private func saveSnapshot() {
+        AppLog.info(.ui, "User requested window snapshot")
+        if let url = WindowSnapshot.saveMainWindowToDesktop() {
+            NSWorkspace.shared.activateFileViewerSelecting([url])
+        }
     }
 }

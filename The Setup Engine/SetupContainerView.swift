@@ -51,11 +51,17 @@ struct SetupContainerView: View {
             QuickSearchOverlay()
                 .environmentObject(coordinator)
         }
+        // Debug badge stays top-right (informational); help dropdown is bottom-left
+        // (out of the way of the main content + footer buttons).
         .overlay(alignment: .topTrailing) {
             #if DEBUG
             DebugBadge()
                 .padding(12)
             #endif
+        }
+        .overlay(alignment: .bottomLeading) {
+            HelpMenuButton()
+                .padding(12)
         }
     }
 

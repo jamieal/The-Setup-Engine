@@ -9,6 +9,10 @@ import SwiftUI
 
 @main
 struct The_Setup_EngineApp: App {
+    init() {
+        IconPrewarm.start()
+    }
+
     var body: some Scene {
         WindowGroup {
             SetupContainerView()

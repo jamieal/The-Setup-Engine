@@ -84,25 +84,10 @@ struct CaskIconView: View {
         return .free
     }
 
-    /// Hand-picked high-res icon URLs for casks where Google's favicon comes back blurry
-    /// (small original or the wrong asset entirely). Verified live before adding.
-    private static let iconOverrides: [String: String] = [
-        "github":        "https://github.com/apple-touch-icon.png",
-        "gimp":          "https://www.gimp.org/images/frontpage/wilber-big.png",
-        "handbrake-app": "https://handbrake.fr/apple-touch-icon.png",
-        "appcleaner":    "https://freemacsoft.net/img/appcleaner.png",
-    ]
-
-    /// Override → Google favicon → nil. Single source per cask, no racing.
+    /// Resolution + override list lives in IconPrewarm so app launch can
+    /// prefetch the same URLs we'll request here.
     private var remoteIconURL: URL? {
-        if let override = Self.iconOverrides[caskName] {
-            return URL(string: override)
-        }
-        guard let homepage = homepageURL,
-              let url = URL(string: homepage),
-              let host = url.host
-        else { return nil }
-        return URL(string: "https://www.google.com/s2/favicons?domain=\(host)&sz=128")
+        CaskIcon.remoteURL(caskName: caskName, homepageURL: homepageURL)
     }
 
     private var fallback: some View {

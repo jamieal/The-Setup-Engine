@@ -2,13 +2,13 @@
 
 A guided macOS setup workflow built with SwiftUI. Installs apps via Homebrew Cask and configures system preferences without ever touching Terminal.
 
-![Welcome](screenshots/01-welcome.png)
+![Welcome — light & dark](screenshots/composite/01-welcome.png)
 
 ## Why
 
-Some days I wipe my Mac multiple times. Others, not so much. Either way, I kept finding myself doing the same thing over and over — downloading the same apps I use daily, toggling the same preferences. I wanted a Mac version of Ninite.
+Some days I wipe my Mac multiple times. Others, not so much. Either way, I kept finding myself doing the same thing over and over — downloading the same apps I use daily, toggling the same preferences. I wanted a Mac version of [Ninite](https://ninite.com/).
 
-What started as a shell script is now this SwiftUI app that walks anyone through the same six steps without ever touching a terminal: Tools, Profile, Apps, System, Review, Install.
+What started as a shell script is now this SwiftUI app that walks anyone through the same six steps without ever touching a terminal: **Tools**, **Profile**, **Apps**, **System**, **Review**, **Install**.
 
 If you're setting up a brand new Mac — or wipe yours as often as I do — I hope it cuts the mundane out of it.
 
@@ -16,33 +16,41 @@ If you're setting up a brand new Mac — or wipe yours as often as I do — I ho
 
 ## How to use
 
+Every screenshot below is **light on the left, dark on the right** — the app follows your system appearance.
+
 ### 1. Tools — install or detect Homebrew
 
-![Tools step](screenshots/02-tools.png)
+If Homebrew isn't there yet, you get a friendly install card:
 
-If Homebrew is missing, hit **Install Homebrew** and the app handles it via `osascript with administrator privileges` — you'll get a single password prompt and a live progress bar. If it's already there, the app says so and skips ahead.
+![Tools — Homebrew not installed](screenshots/composite/02-tools-uninstalled.png)
+
+Hit **Install Homebrew** and the app runs the official installer via `osascript with administrator privileges`. You'll get a single macOS password prompt and a live progress bar (Prep → Download → Extract → Configure → Done).
+
+If Homebrew is already there, the step skips ahead:
+
+![Tools — already installed](screenshots/composite/03-tools-installed.png)
 
 ### 2. Profile — pick a starting set
 
-![Profile step](screenshots/03-profile.png)
+![Profile step](screenshots/composite/04-profile.png)
 
 Five curated profiles: **Developer**, **Designer**, **Office**, **Media**, or **Custom** (start from scratch). Each card previews the apps it'll bring in. Nothing's installed yet — this is just a starting point.
 
 ### 3. Apps — fine-tune the list
 
-![Apps step](screenshots/04-apps.png)
+![Apps step](screenshots/composite/05-apps.png)
 
 The full catalogue, grouped by category. Already-installed apps are greyed out with a green check (the app reads `/Applications` and `~/Applications`). Apps in your queue go to the **To install** rail on the right. Paid/freemium apps get a small badge so you know what you're committing to. **⌘K** opens a quick-search overlay from anywhere.
 
 ### 4. System — tune preferences
 
-![System step](screenshots/05-system.png)
+![System step](screenshots/composite/06-system.png)
 
 Dock position + auto-hide, system appearance (Light / Dark / Auto), Finder path bar + hidden files, 24-hour time. Everything here is a `defaults write` + `killall Dock`/`killall Finder` under the hood — non-destructive and trivially reversible from System Settings.
 
 ### 5. Review — confirm everything
 
-![Review step](screenshots/06-review.png)
+![Review step](screenshots/composite/07-review.png)
 
 A summary of what's about to happen — apps to install, settings to change, and a heads-up if anything in the queue is paid/freemium. Hit **Begin Setup** to actually run it, or **Back** to change anything.
 
@@ -96,6 +104,7 @@ Single-target SwiftUI app. No Swift Package dependencies.
 - **`AppLog`** — lightweight logger; mirrors to `~/Library/Application Support/TheSetupEngine/Logs/`.
 - **`AppVersion`** — single source of truth for version strings, read from Info.plist.
 - **`WindowSnapshot`** — in-app self-screenshot via `NSView.cacheDisplay`, no Screen Recording permission required.
+- **`IconPrewarm`** — bumps `URLCache.shared` to 30 MB and pre-fetches every cask icon URL on app launch so Profile/Apps cards render with their icons populated instead of blank squares.
 - **`DebugState`** — runtime debug overrides (`#if DEBUG` gated). Toggleable from a menu bar item; also reads `TSE_FORCE_NO_BREW=1` and friends from the environment.
 
 ## Safety notes

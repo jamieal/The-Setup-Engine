@@ -4,15 +4,11 @@ A guided macOS setup workflow built with SwiftUI. Installs apps via Homebrew Cas
 
 ![Welcome](screenshots/01-welcome.png)
 
-## Why
+Some days I wipe my Mac multiple times. Others, not so much. Either way, I kept finding myself doing the same thing over and over — downloading the same apps I use daily, toggling the same preferences. I wanted a Mac version of Ninite.
 
-The `setup.sh` from a fresh-Mac script grew up. Bash works fine when *you* run it, but it's not a thing you can hand to a less technical friend. This is the same idea — native, friendly, six steps from a clean Mac to a usable one.
+What started as a shell script is now this SwiftUI app that walks anyone through the same six steps without ever touching a terminal: Tools, Profile, Apps, System, Review, Install.
 
-## Install
-
-1. Download **`The Setup Engine.dmg`** from [Releases](https://github.com/jamieal/The-Setup-Engine/releases).
-2. Open the DMG and drag the app to `/Applications`.
-3. **First launch:** right-click the app → **Open** to bypass Gatekeeper. The build is ad-hoc signed (no Apple Developer Program membership yet — coming).
+If you're setting up a brand new Mac — or wipe yours as often as I do — I hope it cuts the mundane out of it.
 
 **Requirements:** macOS 14 (Sonoma) or later, Apple Silicon (arm64).
 

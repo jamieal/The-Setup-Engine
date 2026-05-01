@@ -4,6 +4,8 @@ A guided macOS setup workflow built with SwiftUI. Installs apps via Homebrew Cas
 
 ![Welcome](screenshots/01-welcome.png)
 
+## Why
+
 Some days I wipe my Mac multiple times. Others, not so much. Either way, I kept finding myself doing the same thing over and over — downloading the same apps I use daily, toggling the same preferences. I wanted a Mac version of Ninite.
 
 What started as a shell script is now this SwiftUI app that walks anyone through the same six steps without ever touching a terminal: Tools, Profile, Apps, System, Review, Install.

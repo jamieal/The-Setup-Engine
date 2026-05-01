@@ -14,34 +14,23 @@ import Foundation
 /// step they're either in the in-memory cache (fast path) or on disk from a
 /// previous launch (also fast).
 enum CaskIcon {
-    /// Hand-picked high-res icon URLs for casks whose Google favicon is blurry,
-    /// missing, or returns the wrong asset entirely. Verified live before adding.
+    /// Hand-picked high-res icon URLs for casks whose Google favicon (the default
+    /// fallback) returns nothing useful at sz=128. Each URL was verified to return
+    /// HTTP 200 and a usable square icon at the time of adding — re-check if you
+    /// see blank cards in Profile/Apps.
+    ///
+    /// Casks not listed here use Google's `/s2/favicons?domain=…&sz=128` endpoint.
     static let overrides: [String: String] = [
-        // Originals
         "github":         "https://github.com/apple-touch-icon.png",
         "gimp":           "https://www.gimp.org/images/frontpage/wilber-big.png",
         "handbrake-app":  "https://handbrake.fr/apple-touch-icon.png",
         "appcleaner":     "https://freemacsoft.net/img/appcleaner.png",
-
-        // Added because Google favicons returned nothing useful for these
-        "sketch":         "https://www.sketch.com/images/components/logos/sketch-logo.png",
-        "blender":        "https://www.blender.org/wp-content/uploads/2020/07/blender_community_badge_white.png",
-        "imageoptim":     "https://imageoptim.com/img/imageoptim-icon-256.png",
-        "sourcetree":     "https://wac-cdn.atlassian.com/dam/jcr:580d0089-3aab-431c-9ad1-9f2e29bd84f0/Atlassian_logo_clear-space-version_blue_RGB.svg",
-        "monitorcontrol": "https://raw.githubusercontent.com/MonitorControl/MonitorControl/master/Resources/Assets.xcassets/AppIcon.appiconset/icon_512x512.png",
-        "stats":          "https://raw.githubusercontent.com/exelban/stats/master/Stats/Supporting%20Files/Assets.xcassets/AppIcon.appiconset/icon_256x256.png",
-        "aldente":        "https://apphousekitchen.com/wp-content/uploads/2021/03/aldente-light.png",
-        "iina":           "https://iina.io/images/iina-icon-60.png",
-        "obs":            "https://obsproject.com/assets/images/new_icon_small-r.png",
-        "rectangle":      "https://rectangleapp.com/img/rectangle-svg.svg",
-        "raycast":        "https://www.raycast.com/favicon-production.png",
-        "warp":           "https://www.warp.dev/static/favicon-256x256.png",
-        "obsidian":       "https://obsidian.md/images/obsidian-logo-gradient.svg",
-        "todoist-app":    "https://todoist.b-cdn.net/assets/images/96cf45b3edd0c5d59ae7df1ed91f7c33.png",
-        "alfred":         "https://www.alfredapp.com/favicon.ico",
-        "the-unarchiver": "https://theunarchiver.com/img/the-unarchiver-icon-128.png",
-        "discord":        "https://assets-global.website-files.com/6257adef93867e50d84d30e2/636e0b54f654380a78de4527_icon_clyde_white_RGB.png",
-        "telegram":       "https://telegram.org/img/t_logo.png",
+        "sketch":         "https://www.sketch.com/images/metadata/icon-180.png",
+        "blender":        "https://www.blender.org/wp-content/themes/bthree/assets/icons/apple-touch-icon.png",
+        "imageoptim":     "https://imageoptim.com/icon.png",
+        "sourcetree":     "https://wac-cdn.atlassian.com/assets/img/favicons/sourcetree/android-chrome-192x192.png",
+        "monitorcontrol": "https://raw.githubusercontent.com/MonitorControl/MonitorControl/main/MonitorControl/Assets.xcassets/AppIcon.appiconset/Icon-512.png",
+        "stats":          "https://raw.githubusercontent.com/exelban/stats/master/Stats/Supporting%20Files/Assets.xcassets/AppIcon.appiconset/icon_512x512.png",
     ]
 
     /// Resolves the remote URL for a cask: override → Google favicon → nil.

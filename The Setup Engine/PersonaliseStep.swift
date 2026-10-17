@@ -37,7 +37,7 @@ struct PersonaliseStep: View {
         .onAppear {
             // Picks may have changed on the Apps step since the Dock was planned.
             if coordinator.personal.dockLayout != .keep && coordinator.personal.dockLayout != .saved {
-                coordinator.setDockLayout(coordinator.personal.dockLayout)
+                coordinator.refreshDockPlan()
             }
             if let path = coordinator.personal.defaultBrowserPath,
                !coordinator.browserChoices.contains(where: { $0.path == path }) {
@@ -224,9 +224,10 @@ struct PersonaliseStep: View {
 
     private var dockList: some View {
         VStack(spacing: 2) {
-            ForEach(Array(coordinator.personal.dockItems.enumerated()), id: \.element.id) { index, item in
+            ForEach($coordinator.personal.dockItems) { $item in
+                let index = coordinator.personal.dockItems.firstIndex { $0.id == item.id } ?? 0
                 HStack(spacing: 10) {
-                    Toggle("", isOn: $coordinator.personal.dockItems[index].included)
+                    Toggle("", isOn: $item.included)
                         .toggleStyle(.checkbox)
                         .labelsHidden()
                     DockIcon(item: item, size: 20)

@@ -80,15 +80,16 @@ nonisolated enum WallpaperSetter {
         return dest
     }
 
-    /// Sets the picture on every screen.
+    /// Sets the picture on every screen. True if at least one screen changed
+    /// (so undo is offered even if another screen refused).
     @MainActor
     static func set(_ image: URL) -> Bool {
-        var ok = true
+        var ok = false
         for screen in NSScreen.screens {
             do {
                 try NSWorkspace.shared.setDesktopImageURL(image, for: screen, options: [:])
+                ok = true
             } catch {
-                ok = false
                 AppLog.warn(.settings, "Couldn't set wallpaper on \(screen.localizedName): \(error.localizedDescription)")
             }
         }

@@ -153,8 +153,7 @@ final class SetupCoordinator: ObservableObject {
     /// and scans what's already installed so the Apps step has data ready.
     func preflight() async {
         async let catalogLoad: Void = catalog.load()
-        touchIDStatus = TouchIDStatus.detect()
-        personal.touchID = touchIDStatus == .available
+        touchIDStatus = TouchIDStatus.detect()   // offered, but off until chosen
         await loadInstalledState()
         await catalogLoad
     }
@@ -346,6 +345,17 @@ final class SetupCoordinator: ObservableObject {
         case .saved:
             personal.dockItems = personal.savedDock ?? []
         }
+    }
+
+    /// Re-plans the Dock after picks changed, keeping the person's order and
+    /// ticks for apps still in the plan and adding new picks at the end.
+    func refreshDockPlan() {
+        let current = personal.dockItems
+        setDockLayout(personal.dockLayout)
+        let fresh = personal.dockItems
+        let kept = current.filter { item in fresh.contains { $0.path == item.path } }
+        let added = fresh.filter { item in !current.contains { $0.path == item.path } }
+        personal.dockItems = kept + added
     }
 
     /// Browsers the user could make default: Safari, browsers already on the
@@ -549,6 +559,14 @@ final class SetupCoordinator: ObservableObject {
         // 5. System preferences. Snapshot first, for the receipt and undo.
         settingsBefore = await SettingsSnapshot.capture()
         wallpaperBefore = WallpaperSnapshot.capture()
+        // The Dock backup must predate the Dock position/auto-hide settings too.
+        var dockBackupReady = false
+        if personal.dockLayout != .keep {
+            let stamp = ISO8601DateFormatter().string(from: Date()).replacingOccurrences(of: ":", with: "-")
+            let backup = PersonalSetup.backupsDirectory.appending(path: "Dock before \(stamp).plist")
+            dockBackupReady = await DockWriter.backup(to: backup)
+            if dockBackupReady { dockBackup = backup }
+        }
         let script = settings.commandLine()
         if !script.isEmpty {
             AppLog.info(.settings, "Applying system preferences")
@@ -558,7 +576,7 @@ final class SetupCoordinator: ObservableObject {
 
         // 6. Personal touches. The Dock and browser go last so freshly
         //    installed apps can be included.
-        await applyPersonal()
+        await applyPersonal(dockBackupReady: dockBackupReady)
 
         settingsAfter = await SettingsSnapshot.capture()
         receiptURL = makeReceipt().save()
@@ -570,7 +588,7 @@ final class SetupCoordinator: ObservableObject {
 }
 
 extension SetupCoordinator {
-    func applyPersonal() async {
+    func applyPersonal(dockBackupReady: Bool) async {
         let folders = personal.folders.filter(\.isOn).map { Personalisation.sanitisedFolder($0.path) }.filter { !$0.isEmpty }
         let created = PersonalSetup.createFolders(folders)
         if !folders.isEmpty {
@@ -588,13 +606,17 @@ extension SetupCoordinator {
 
         if personal.dockLayout != .keep {
             let paths = personal.dockItems.filter(\.included).map(\.path)
-            try? FileManager.default.createDirectory(at: PersonalSetup.backupsDirectory, withIntermediateDirectories: true)
-            let stamp = ISO8601DateFormatter().string(from: Date()).replacingOccurrences(of: ":", with: "-")
-            let backup = PersonalSetup.backupsDirectory.appending(path: "Dock before \(stamp).plist")
-            if await DockWriter.apply(paths: paths, backupTo: backup) {
-                dockBackup = backup
+            if !dockBackupReady {
+                // Without a backup there'd be no way back, so don't touch it.
+                personalNotes.append("The Dock was left as it was (couldn't save a backup first)")
+            } else if await DockWriter.apply(paths: paths) {
                 let placed = paths.filter { FileManager.default.fileExists(atPath: $0) }.count
                 personalNotes.append("Your Dock now has \(placed) apps")
+            } else if paths.allSatisfy({ !FileManager.default.fileExists(atPath: $0) }) {
+                dockBackup = nil   // nothing changed, nothing to undo
+                personalNotes.append("The Dock was left as it was (none of its apps were installed)")
+            } else {
+                personalNotes.append("Some Dock changes didn't apply; Undo puts the old Dock back")
             }
         }
 
@@ -650,7 +672,7 @@ extension SetupCoordinator {
     func undoChanges() async {
         let changed = zip(settingsBefore, settingsAfter).filter { $0 != $1 }.map(\.0)
         await SettingsSnapshot.restore(changed)
-        if let dockBackup { _ = await DockWriter.restore(from: dockBackup) }
+        if let dockBackup { _ = await DockWriter.restoreApps(from: dockBackup) }
         if wallpaperChanged { WallpaperSnapshot.restore(wallpaperBefore) }
         changesUndone = true
         AppLog.info(.settings, "Undid this run's settings, Dock and wallpaper changes")

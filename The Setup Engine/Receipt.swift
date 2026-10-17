@@ -77,8 +77,10 @@ nonisolated enum SettingsSnapshot {
         for process in ["Dock", "Finder", "SystemUIServer", "ControlCenter"] {
             _ = await DirectInstaller.run("/usr/bin/killall", [process])
         }
-        // Only repaint the appearance if it's one of the settings being restored.
-        if let style = values.first(where: { $0.key == "AppleInterfaceStyle" }) {
+        // Only repaint the appearance if it's one of the settings being restored,
+        // and not when going back to automatic (forcing a mode would turn that off).
+        let backToAuto = values.contains { $0.key == "AppleInterfaceStyleSwitchesAutomatically" && $0.value == "1" }
+        if !backToAuto, let style = values.first(where: { $0.key == "AppleInterfaceStyle" }) {
             let dark = style.value == "Dark"
             _ = await DirectInstaller.run("/usr/bin/osascript", [
                 "-e", "tell application \"System Events\" to tell appearance preferences to set dark mode to \(dark)",
@@ -100,12 +102,18 @@ nonisolated enum SettingsSnapshot {
 // MARK: - Wallpaper undo
 
 enum WallpaperSnapshot {
-    /// The current desktop picture for each screen, keyed by screen name.
+    /// A stable ID per display (two identical monitors share a name).
+    static func key(_ screen: NSScreen) -> String {
+        let number = screen.deviceDescription[NSDeviceDescriptionKey("NSScreenNumber")] as? NSNumber
+        return number.map { "display-\($0)" } ?? screen.localizedName
+    }
+
+    /// The current desktop picture for each screen.
     static func capture() -> [String: URL] {
         var out: [String: URL] = [:]
         for screen in NSScreen.screens {
             if let url = NSWorkspace.shared.desktopImageURL(for: screen) {
-                out[screen.localizedName] = url
+                out[key(screen)] = url
             }
         }
         return out
@@ -113,7 +121,7 @@ enum WallpaperSnapshot {
 
     static func restore(_ snapshot: [String: URL]) {
         for screen in NSScreen.screens {
-            guard let url = snapshot[screen.localizedName] else { continue }
+            guard let url = snapshot[key(screen)] else { continue }
             try? NSWorkspace.shared.setDesktopImageURL(url, for: screen, options: [:])
         }
     }

@@ -48,6 +48,9 @@ struct SetupContainerView: View {
         .task {
             await coordinator.preflight()
         }
+        .onChange(of: coordinator.currentStep) {
+            recipes.acceptsRecipes = coordinator.currentStep.rawValue < SetupCoordinator.Step.install.rawValue
+        }
         .onReceive(recipes.$pending.compactMap { $0 }) { recipe in
             recipes.pending = nil
             Task { await coordinator.apply(recipe: recipe) }

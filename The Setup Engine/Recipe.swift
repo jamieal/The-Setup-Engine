@@ -78,9 +78,15 @@ final class RecipeInbox: ObservableObject {
     @Published var error: String?
     /// Set by the File menu; the setup window builds and saves the recipe.
     @Published var exportThisMacRequested = false
+    /// False once installing starts: a recipe then would change a run in progress.
+    @Published var acceptsRecipes = true
     private init() {}
 
     func open(_ url: URL) {
+        guard acceptsRecipes else {
+            error = "A recipe can only be opened before setup begins."
+            return
+        }
         do {
             pending = try SetupRecipe.load(from: url)
             AppLog.info(.general, "Opened recipe \(url.lastPathComponent)")
@@ -91,6 +97,10 @@ final class RecipeInbox: ObservableObject {
     }
 
     func chooseAndOpen() {
+        guard acceptsRecipes else {
+            error = "A recipe can only be opened before setup begins."
+            return
+        }
         let panel = NSOpenPanel()
         panel.allowedContentTypes = [SetupRecipe.contentType, .json]
         panel.message = "Choose a Setup Engine recipe"
@@ -141,7 +151,8 @@ extension SetupCoordinator {
             return .init(token: token, name: cask.record.name)
         }
         let tools = await HomebrewSupport.formulaeInstalledOnRequest()
-        recipe.apps += tools.sorted().map { .init(token: $0, name: $0, kind: .commandLine) }
+        // Tapped formulae ("user/tap/name") need their tap first; leave them out.
+        recipe.apps += tools.sorted().filter { !$0.contains("/") }.map { .init(token: $0, name: $0, kind: .commandLine) }
 
         let now = await SettingsSnapshot.capture()
         func value(_ key: String) -> DefaultsValue? { now.first { $0.key == key } }
@@ -187,14 +198,22 @@ extension SetupCoordinator {
             uniquingKeysWith: { first, _ in first }
         )
         selectedProfile = nil
+        var seen = Set<String>()
         selectedApps = recipe.apps.compactMap { item -> AppEntry? in
-            let entry = curated[item.token] ?? catalog.cask(item.token).map {
-                AppEntry(caskName: $0.token, displayName: $0.record.name,
-                         homepageURL: $0.record.homepage, desc: $0.record.desc)
-            } ?? (item.kind == .commandLine
-                  ? AppEntry(caskName: item.token, displayName: item.name, kind: .commandLine)
-                  : nil)
-            guard let entry, unavailableReason(entry) == nil else { return nil }
+            let entry: AppEntry?
+            if item.kind == .commandLine {
+                // A formula can share its name with an app ("docker"), so
+                // never look command-line tools up in the app catalog.
+                guard HomebrewSupport.isValidFormulaName(item.token) else { return nil }
+                entry = Suggestions.commandLineTools.first { $0.caskName == item.token }
+                    ?? AppEntry(caskName: item.token, displayName: item.name, kind: .commandLine)
+            } else {
+                entry = curated[item.token].flatMap { $0.kind == .app ? $0 : nil } ?? catalog.cask(item.token).map {
+                    AppEntry(caskName: $0.token, displayName: $0.record.name,
+                             homepageURL: $0.record.homepage, desc: $0.record.desc)
+                }
+            }
+            guard let entry, unavailableReason(entry) == nil, seen.insert(entry.caskName).inserted else { return nil }
             return entry
         }
 
@@ -218,7 +237,9 @@ extension SetupCoordinator {
             personal.screenshotsFolder = p.screenshotsFolder != nil
             if let name = p.screenshotsFolder { personal.screenshotsFolderName = Personalisation.sanitisedFolder(name, fallback: "Screenshots") }
             if let dock = p.dock {
+                var seenPaths = Set<String>()
                 personal.savedDock = dock.compactMap { item in
+                    guard seenPaths.insert(item.path).inserted else { return nil }
                     // Only app bundles under the usual Applications folders.
                     guard item.path.hasSuffix(".app"),
                           ["/Applications/", "/System/Applications/", NSHomeDirectory() + "/Applications/"]
@@ -231,7 +252,10 @@ extension SetupCoordinator {
                 setDockLayout(.saved)
             }
             if let browser = p.defaultBrowser {
-                personal.defaultBrowserPath = browserChoices.first { $0.name == browser }?.path
+                // Recipes store the app's bundle name ("Firefox", "Brave Browser").
+                personal.defaultBrowserPath = browserChoices.first {
+                    (($0.path as NSString).lastPathComponent as NSString).deletingPathExtension == browser
+                }?.path
             }
             personal.touchID = p.touchIDForSudo && touchIDStatus == .available
         }

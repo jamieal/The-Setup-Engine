@@ -48,7 +48,12 @@ nonisolated enum TouchIDForSudo {
         if grep -qE '^auth[[:space:]]+sufficient[[:space:]]+pam_tid\\.so' /etc/pam.d/sudo_local 2>/dev/null; then
             echo 'TSE_OK touchid'
         elif [ -f /etc/pam.d/sudo_local ]; then
-            { echo '\(line)'; cat /etc/pam.d/sudo_local; } > /etc/pam.d/sudo_local.tse && \\
+            # pam_reattach (for tmux) must come before pam_tid, so add ours after it.
+            if grep -q pam_reattach /etc/pam.d/sudo_local; then
+                /usr/bin/awk '{print} /pam_reattach/ && !done {print "\(line)"; done=1}' /etc/pam.d/sudo_local
+            else
+                echo '\(line)'; cat /etc/pam.d/sudo_local
+            fi > /etc/pam.d/sudo_local.tse && \\
             /bin/mv /etc/pam.d/sudo_local.tse /etc/pam.d/sudo_local && \\
             /usr/sbin/chown root:wheel /etc/pam.d/sudo_local && /bin/chmod 444 /etc/pam.d/sudo_local && \\
             echo 'TSE_OK touchid' || echo 'TSE_FAIL touchid'
@@ -115,12 +120,24 @@ enum AppleApps {
 }
 
 nonisolated enum DockWriter {
-    /// Replaces the Dock's apps with `paths` (skipping any that don't exist),
-    /// after saving a copy of the current Dock so it can be restored.
-    static func apply(paths: [String], backupTo backup: URL) async -> Bool {
-        _ = await DirectInstaller.run("/usr/bin/defaults", ["export", "com.apple.dock", backup.path])
+    /// Saves the whole Dock domain. Call before changing *any* Dock setting
+    /// (position, auto-hide or apps) so the backup is truly "before".
+    static func backup(to url: URL) async -> Bool {
+        try? FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
+        let r = await DirectInstaller.run("/usr/bin/defaults", ["export", "com.apple.dock", url.path])
+        return r.status == 0 && !SettingsSnapshot.dockNames(in: url).isEmpty
+    }
+
+    /// Replaces the Dock's apps with `paths` (skipping any that don't exist).
+    /// Refuses to leave the Dock empty.
+    static func apply(paths: [String]) async -> Bool {
+        let existing = paths.filter { FileManager.default.fileExists(atPath: $0) }
+        guard !existing.isEmpty else {
+            AppLog.warn(.settings, "Dock plan had no apps that exist; leaving the Dock alone")
+            return false
+        }
         var ok = await DirectInstaller.run("/usr/bin/defaults", ["write", "com.apple.dock", "persistent-apps", "-array"]).status == 0
-        for path in paths where FileManager.default.fileExists(atPath: path) {
+        for path in existing {
             // Same form the Dock writes itself: a file URL, type 15.
             let fileURL = URL(filePath: path, directoryHint: .isDirectory).absoluteString
             let tile = """
@@ -132,15 +149,30 @@ nonisolated enum DockWriter {
             ok = ok && r.status == 0
         }
         _ = await DirectInstaller.run("/usr/bin/killall", ["Dock"])
-        AppLog.info(.settings, "Dock set to \(paths.count) apps (backup: \(backup.path))")
+        AppLog.info(.settings, "Dock set to \(existing.count) apps")
         return ok
     }
 
-    /// Restores a Dock saved by `apply`.
-    static func restore(from backup: URL) async -> Bool {
-        let r = await DirectInstaller.run("/usr/bin/defaults", ["import", "com.apple.dock", backup.path])
+    /// Puts back only the Dock's app list from a backup. Position and
+    /// auto-hide are restored separately, with the other settings.
+    static func restoreApps(from backup: URL) async -> Bool {
+        guard let data = try? Data(contentsOf: backup),
+              let root = try? PropertyListSerialization.propertyList(from: data, format: nil) as? [String: Any],
+              let tiles = root["persistent-apps"] as? [[String: Any]], !tiles.isEmpty
+        else { return false }
+        var ok = await DirectInstaller.run("/usr/bin/defaults", ["write", "com.apple.dock", "persistent-apps", "-array"]).status == 0
+        for tile in tiles {
+            guard let xml = try? PropertyListSerialization.data(fromPropertyList: tile, format: .xml, options: 0),
+                  let text = String(data: xml, encoding: .utf8),
+                  let start = text.range(of: "<dict>"),
+                  let end = text.range(of: "</dict>", options: .backwards)
+            else { continue }
+            let fragment = String(text[start.lowerBound..<end.upperBound])
+            let r = await DirectInstaller.run("/usr/bin/defaults", ["write", "com.apple.dock", "persistent-apps", "-array-add", fragment])
+            ok = ok && r.status == 0
+        }
         _ = await DirectInstaller.run("/usr/bin/killall", ["Dock"])
-        return r.status == 0
+        return ok
     }
 
     private static func xmlEscape(_ s: String) -> String {

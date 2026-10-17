@@ -87,7 +87,7 @@ scripts/publish-wallpapers.sh ~/Pictures/Wallpaper\ picks
 DRY_RUN=1 scripts/publish-wallpapers.sh <folder>   # preview without uploading
 ```
 
-It makes thumbnails, writes titles from the file names, adds SHA-256 checksums, and uploads everything with `gh`. Until a collection is published, the app just offers "Choose your own photo".
+It makes thumbnails, strips all metadata (GPS location, camera, dates; release files are public), writes titles from the file names, adds SHA-256 checksums, and uploads everything with `gh`. Until a collection is published, the app just offers "Choose your own photo".
 
 ## Diagnostics
 

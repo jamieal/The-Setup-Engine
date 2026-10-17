@@ -7,6 +7,7 @@ import AppKit
 ///
 ///   TSE_START_STEP=personalise   step to show (Step case name)
 ///   TSE_PROFILE=Developer        pre-pick a profile's apps
+///   TSE_DOCK=keep                leave the Dock plan empty (shorter page)
 ///   TSE_SNAPSHOT_TO=/path.png    save the window there, then quit
 enum DebugAutopilot {
     static func run(_ coordinator: SetupCoordinator) async {
@@ -18,7 +19,8 @@ enum DebugAutopilot {
         }
         if let step = SetupCoordinator.Step.allCases.first(where: { "\($0)" == stepName }),
            step != .install {
-            if step.rawValue > SetupCoordinator.Step.personalise.rawValue || step == .personalise {
+            if env["TSE_DOCK"] != "keep",
+               step.rawValue > SetupCoordinator.Step.personalise.rawValue || step == .personalise {
                 coordinator.setDockLayout(.essentialsAndMine)
             }
             coordinator.currentStep = step

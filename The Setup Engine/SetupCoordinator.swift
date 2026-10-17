@@ -64,6 +64,10 @@ final class SetupCoordinator: ObservableObject {
     @Published var settings = SystemPreferences()
     @Published var personal = Personalisation()
     @Published var touchIDStatus: TouchIDStatus = .noSensor
+    /// The desktop settings as the Mac had them at launch.
+    @Published var desktopNow = DesktopPreferences()
+
+    var desktopChangeCount: Int { personal.desktop.changedCount(from: desktopNow) }
     /// What the Personalise step did (or couldn't do), in plain words.
     @Published var personalNotes: [String] = []
     /// Copy of the Dock taken before we changed it, for undo.
@@ -154,6 +158,8 @@ final class SetupCoordinator: ObservableObject {
     func preflight() async {
         async let catalogLoad: Void = catalog.load()
         touchIDStatus = TouchIDStatus.detect()   // offered, but off until chosen
+        desktopNow = await DesktopPreferences.current()
+        personal.desktop = desktopNow
         await loadInstalledState()
         await catalogLoad
     }
@@ -606,13 +612,16 @@ extension SetupCoordinator {
         }
 
         if personal.dockLayout != .keep {
+            // Picks can change after Personalise (⌘K works on every step), so
+            // re-plan now, keeping the person's order and unticks.
+            if personal.dockLayout != .saved { refreshDockPlan() }
             let paths = personal.dockItems.filter(\.included).map(\.path)
             if !dockBackupReady {
                 // Without a backup there'd be no way back, so don't touch it.
                 personalNotes.append("The Dock was left as it was (couldn't save a backup first)")
             } else if await DockWriter.apply(paths: paths) {
                 let placed = paths.filter { FileManager.default.fileExists(atPath: $0) }.count
-                personalNotes.append("Your Dock now has \(placed) apps")
+                personalNotes.append("Your Dock now has \(placed) \(placed == 1 ? "app" : "apps")")
             } else if paths.allSatisfy({ !FileManager.default.fileExists(atPath: $0) }) {
                 dockBackup = nil   // nothing changed, nothing to undo
                 personalNotes.append("The Dock was left as it was (none of its apps were installed)")
@@ -620,6 +629,8 @@ extension SetupCoordinator {
                 personalNotes.append("Some Dock changes didn't apply; Undo puts the old Dock back")
             }
         }
+
+        personalNotes += await personal.desktop.apply(comparedTo: desktopNow)
 
         switch personal.wallpaper {
         case .keep:

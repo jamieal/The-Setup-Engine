@@ -30,6 +30,9 @@ nonisolated enum SettingsSnapshot {
         ("com.apple.finder", "AppleShowAllFiles", "Hidden files in Finder"),
         ("NSGlobalDomain", "AppleICUForce24HourTime", "24-hour time"),
         ("com.apple.screencapture", "location", "Screenshots folder"),
+        ("com.apple.finder", "CreateDesktop", "Icons on the desktop"),
+        ("com.apple.finder", "ShowExternalHardDrivesOnDesktop", "External drives on the desktop"),
+        ("com.apple.WindowManager", "EnableStandardClickToShowDesktop", "Click wallpaper to reveal desktop"),
     ]
 
     static func label(for value: DefaultsValue) -> String {
@@ -74,7 +77,9 @@ nonisolated enum SettingsSnapshot {
                 _ = await DirectInstaller.run("/usr/bin/defaults", ["delete", v.domain, v.key])
             }
         }
-        for process in ["Dock", "Finder", "SystemUIServer", "ControlCenter"] {
+        var processes = ["Dock", "Finder", "SystemUIServer", "ControlCenter"]
+        if values.contains(where: { $0.domain == "com.apple.WindowManager" }) { processes.append("WindowManager") }
+        for process in processes {
             _ = await DirectInstaller.run("/usr/bin/killall", [process])
         }
         // Only repaint the appearance if it's one of the settings being restored,

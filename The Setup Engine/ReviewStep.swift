@@ -25,6 +25,8 @@ struct ReviewStep: View {
 
                     pricingHeadsUp
 
+                    dockHeadsUp
+
                     passwordHeadsUp
 
                     estimateLine
@@ -69,6 +71,28 @@ struct ReviewStep: View {
                     .font(.caption)
                 }
             }
+            .padding(12)
+            .frame(maxWidth: 880, alignment: .leading)
+            .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
+            .padding(.horizontal, 40)
+        }
+    }
+
+    /// Warns when the planned Dock would be nearly empty, since it replaces
+    /// the current one.
+    @ViewBuilder
+    private var dockHeadsUp: some View {
+        let p = coordinator.personal
+        let items = p.dockItems.filter(\.included)
+        if p.dockLayout != .keep && items.count < 3 {
+            HStack(alignment: .firstTextBaseline, spacing: 6) {
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .foregroundStyle(.orange)
+                Text(items.isEmpty
+                     ? "Your Dock plan has no apps, so the Dock will be left as it is."
+                     : "Your Dock will only have \(ListFormatter.localizedString(byJoining: items.map(\.name))), plus Finder and the Trash. Go back to Personalise to add more.")
+            }
+            .font(.caption)
             .padding(12)
             .frame(maxWidth: 880, alignment: .leading)
             .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
@@ -199,7 +223,12 @@ struct ReviewStep: View {
 
         return SummaryCard(symbol: "person.crop.square", title: "Personal", tint: .purple) {
             VStack(alignment: .leading, spacing: 6) {
-                summaryRow("Dock", p.dockLayout == .keep ? "No change" : "\(dockCount) apps")
+                summaryRow("Dock", p.dockLayout == .keep ? "No change"
+                           : (dockCount <= 3 ? (p.dockItems.filter(\.included).map(\.name).joined(separator: ", ")).ifEmpty("Empty")
+                                             : "\(dockCount) apps"))
+                if coordinator.desktopChangeCount > 0 {
+                    summaryRow("Desktop", "\(coordinator.desktopChangeCount) \(coordinator.desktopChangeCount == 1 ? "change" : "changes")")
+                }
                 summaryRow("Folders", folders.isEmpty ? "None" : folders.joined(separator: ", "))
                 summaryRow("Screenshots", p.screenshotsFolder ? (p.screenshotsPath as NSString).abbreviatingWithTildeInPath : "Desktop")
                 summaryRow("Browser", browser ?? "No change")
@@ -320,4 +349,8 @@ struct FlowLayout: Layout {
     ReviewStep()
         .environmentObject(SetupCoordinator())
         .frame(width: 880, height: 620)
+}
+
+private extension String {
+    func ifEmpty(_ fallback: String) -> String { isEmpty ? fallback : self }
 }

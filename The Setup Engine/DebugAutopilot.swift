@@ -7,7 +7,8 @@ import AppKit
 ///
 ///   TSE_START_STEP=personalise   step to show (Step case name)
 ///   TSE_PROFILE=Developer        pre-pick a profile's apps
-///   TSE_DOCK=keep                leave the Dock plan empty (shorter page)
+///   TSE_DOCK=keep|only           Dock layout (default: essentials + my apps)
+///   TSE_ONLY_APP=spotify         keep just this one pick
 ///   TSE_SNAPSHOT_TO=/path.png    save the window there, then quit
 enum DebugAutopilot {
     static func run(_ coordinator: SetupCoordinator) async {
@@ -19,9 +20,16 @@ enum DebugAutopilot {
         }
         if let step = SetupCoordinator.Step.allCases.first(where: { "\($0)" == stepName }),
            step != .install {
-            if env["TSE_DOCK"] != "keep",
-               step.rawValue > SetupCoordinator.Step.personalise.rawValue || step == .personalise {
-                coordinator.setDockLayout(.essentialsAndMine)
+            if step.rawValue >= SetupCoordinator.Step.personalise.rawValue {
+                switch env["TSE_DOCK"] {
+                case "keep": break
+                case "only": coordinator.setDockLayout(.onlyMine)
+                default:     coordinator.setDockLayout(.essentialsAndMine)
+                }
+            }
+            if let token = env["TSE_ONLY_APP"] {   // narrow picks to one app
+                coordinator.selectedApps = coordinator.selectedApps.filter { $0.caskName == token }
+                if coordinator.personal.dockLayout != .keep { coordinator.setDockLayout(coordinator.personal.dockLayout) }
             }
             coordinator.currentStep = step
         }

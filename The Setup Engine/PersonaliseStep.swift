@@ -9,29 +9,57 @@ struct PersonaliseStep: View {
     @State private var newFolder = ""
     @ObservedObject private var wallpapers = WallpaperCollection.shared
 
-    var body: some View {
-        VStack(spacing: 24) {
-            StepHero(
-                symbol: "person.crop.square",
-                title: "Make it yours",
-                subtitle: "The small things that make a Mac feel like yours. Nothing changes until you press Begin Setup."
-            )
-            .padding(.top, 28)
+    /// Every option sits in the sidebar with what it will do, so nothing is
+    /// hidden below the fold.
+    enum Section: String, CaseIterable, Identifiable {
+        case dock, desktop, folders, screenshots, browser, touchID
+        var id: String { rawValue }
 
-            ScrollView {
-                VStack(spacing: 14) {
-                    dockCard
-                    wallpaperCard
-                    foldersCard
-                    screenshotsCard
-                    browserCard
-                    touchIDCard
-                }
-                .padding(.horizontal, 40)
-                .padding(.bottom, 16)
-                .frame(maxWidth: 760)
+        var title: String {
+            switch self {
+            case .dock:        "Dock"
+            case .desktop:     "Desktop & wallpaper"
+            case .folders:     "Folders"
+            case .screenshots: "Screenshots"
+            case .browser:     "Default browser"
+            case .touchID:     "Touch ID for sudo"
             }
-            .frame(maxWidth: .infinity)
+        }
+
+        var symbol: String {
+            switch self {
+            case .dock:        "dock.rectangle"
+            case .desktop:     "photo.on.rectangle"
+            case .folders:     "folder.badge.plus"
+            case .screenshots: "camera.viewfinder"
+            case .browser:     "safari"
+            case .touchID:     "touchid"
+            }
+        }
+    }
+
+    @State private var section: Section = .dock
+
+    var body: some View {
+        VStack(spacing: 18) {
+            VStack(spacing: 6) {
+                Text("Make it yours")
+                    .font(.system(size: 28, weight: .bold))
+                Text("Pick a section on the left. Nothing changes until you press Begin Setup.")
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
+            }
+            .padding(.top, 24)
+
+            HStack(alignment: .top, spacing: 20) {
+                sidebar
+                ScrollView {
+                    panel
+                        .padding(.bottom, 16)
+                }
+                .frame(maxWidth: .infinity)
+            }
+            .padding(.horizontal, 32)
         }
         .task { await wallpapers.load() }
         .onAppear {
@@ -44,6 +72,114 @@ struct PersonaliseStep: View {
                 coordinator.personal.defaultBrowserPath = nil
             }
         }
+    }
+
+    // MARK: - Sidebar
+
+    private var sidebar: some View {
+        VStack(spacing: 4) {
+            ForEach(Section.allCases) { s in
+                Button {
+                    withAnimation(.easeInOut(duration: 0.15)) { section = s }
+                } label: {
+                    HStack(spacing: 10) {
+                        Image(systemName: s.symbol)
+                            .frame(width: 22)
+                            .foregroundStyle(.tint)
+                        VStack(alignment: .leading, spacing: 1) {
+                            Text(s.title)
+                                .font(.callout.weight(.medium))
+                            Text(summary(s))
+                                .font(.caption)
+                                .foregroundStyle(changes(s) ? Color.accentColor : .secondary)
+                                .lineLimit(1)
+                                .truncationMode(.middle)
+                        }
+                        Spacer(minLength: 0)
+                    }
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 8)
+                    .contentShape(Rectangle())
+                    .background(
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(section == s ? Color.accentColor.opacity(0.15) : .clear)
+                    )
+                }
+                .buttonStyle(.plain)
+            }
+            Spacer(minLength: 0)
+        }
+        .frame(width: 250)
+    }
+
+    @ViewBuilder
+    private var panel: some View {
+        switch section {
+        case .dock:        dockCard
+        case .desktop:     VStack(spacing: 14) { wallpaperCard; desktopCard }
+        case .folders:     foldersCard
+        case .screenshots: screenshotsCard
+        case .browser:     browserCard
+        case .touchID:     touchIDCard
+        }
+    }
+
+    /// What each section will do, in a few words.
+    private func summary(_ s: Section) -> String {
+        let p = coordinator.personal
+        switch s {
+        case .dock:
+            guard p.dockLayout != .keep else { return "No change" }
+            let n = p.dockItems.filter(\.included).count
+            return "\(n) \(n == 1 ? "app" : "apps") · \(p.dockLayout.label)"
+        case .desktop:
+            let toggles = coordinator.desktopChangeCount
+            let wallpaper = p.wallpaper == .keep ? nil : p.wallpaper.label
+            switch (wallpaper, toggles) {
+            case (nil, 0): return "No change"
+            case (let w?, 0): return w
+            case (nil, let n): return "\(n) \(n == 1 ? "change" : "changes")"
+            case (let w?, let n): return "\(w) · \(n) more"
+            }
+        case .folders:
+            let on = p.folders.filter(\.isOn).map { "~/" + $0.path }
+            return on.isEmpty ? "None" : on.joined(separator: ", ")
+        case .screenshots:
+            return p.screenshotsFolder ? (p.screenshotsPath as NSString).abbreviatingWithTildeInPath : "No change"
+        case .browser:
+            return p.defaultBrowserPath.map { (($0 as NSString).lastPathComponent as NSString).deletingPathExtension } ?? "No change"
+        case .touchID:
+            switch coordinator.touchIDStatus {
+            case .available:      return p.touchID ? "Turn on" : "Off"
+            case .alreadyOn:      return "Already on"
+            case .noFingerprints: return "Needs a fingerprint first"
+            case .noSensor:       return "Not available"
+            }
+        }
+    }
+
+    private func changes(_ s: Section) -> Bool {
+        let text = summary(s)
+        return !["No change", "None", "Off", "Not available", "Already on", "Needs a fingerprint first"].contains(text)
+    }
+
+    // MARK: - Desktop
+
+    private var desktopCard: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            cardHeader(symbol: "menubar.dock.rectangle", title: "Desktop",
+                       description: "These start as your Mac has them now; only what you change is applied.")
+            Toggle("Show icons on the desktop", isOn: $coordinator.personal.desktop.showIcons)
+            Toggle("Show external drives on the desktop", isOn: $coordinator.personal.desktop.showExternalDrives)
+            Toggle("Click the wallpaper to reveal the desktop", isOn: $coordinator.personal.desktop.clickWallpaperToReveal)
+            Text("Turn off the last one to stop windows sliding away when you click the wallpaper.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+        .toggleStyle(.switch)
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 14))
     }
 
     // MARK: - Touch ID

@@ -197,6 +197,54 @@ enum KnownBrowsers {
     static let tokens: Set<String> = ["google-chrome", "firefox", "arc", "brave-browser", "microsoft-edge"]
 }
 
+// MARK: - Desktop
+
+/// Desktop behaviour. Starts as the Mac has it; only changed values are written.
+struct DesktopPreferences: Equatable {
+    var showIcons = true
+    var showExternalDrives = true
+    var clickWallpaperToReveal = true
+
+    private static let keys: [(domain: String, key: String, path: WritableKeyPath<DesktopPreferences, Bool>)] = [
+        ("com.apple.finder", "CreateDesktop", \.showIcons),
+        ("com.apple.finder", "ShowExternalHardDrivesOnDesktop", \.showExternalDrives),
+        ("com.apple.WindowManager", "EnableStandardClickToShowDesktop", \.clickWallpaperToReveal),
+    ]
+
+    /// Reads the Mac's current values (macOS defaults when a key isn't set).
+    static func current() async -> DesktopPreferences {
+        var prefs = DesktopPreferences()
+        for k in keys {
+            let r = await DirectInstaller.run("/usr/bin/defaults", ["read", k.domain, k.key])
+            guard r.status == 0 else { continue }
+            let text = String(decoding: r.stdout, as: UTF8.self).trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+            prefs[keyPath: k.path] = !(text == "0" || text == "false" || text == "no")
+        }
+        return prefs
+    }
+
+    func changedCount(from old: DesktopPreferences) -> Int {
+        Self.keys.filter { self[keyPath: $0.path] != old[keyPath: $0.path] }.count
+    }
+
+    /// Writes only the values that differ from `old`, then refreshes Finder
+    /// and the window manager. Returns notes for the finish screen.
+    func apply(comparedTo old: DesktopPreferences) async -> [String] {
+        var notes: [String] = []
+        var touched = Set<String>()
+        for k in Self.keys where self[keyPath: k.path] != old[keyPath: k.path] {
+            let on = self[keyPath: k.path]
+            _ = await DirectInstaller.run("/usr/bin/defaults", ["write", k.domain, k.key, "-bool", on ? "true" : "false"])
+            touched.insert(k.domain)
+            let label = SettingsSnapshot.tracked.first { $0.domain == k.domain && $0.key == k.key }?.label ?? k.key
+            notes.append("\(label): \(on ? "on" : "off")")
+        }
+        if touched.contains("com.apple.finder") { _ = await DirectInstaller.run("/usr/bin/killall", ["Finder"]) }
+        if touched.contains("com.apple.WindowManager") { _ = await DirectInstaller.run("/usr/bin/killall", ["WindowManager"]) }
+        return notes
+    }
+}
+
 // MARK: - Personal settings
 
 /// Everything on the Personalise step (#17).
@@ -229,6 +277,7 @@ struct Personalisation {
     var defaultBrowserPath: String?
 
     var wallpaper: WallpaperChoice = .keep
+    var desktop = DesktopPreferences()
 
     var screenshotsPath: String {
         NSHomeDirectory() + "/Pictures/" + Self.sanitisedFolder(screenshotsFolderName, fallback: "Screenshots")

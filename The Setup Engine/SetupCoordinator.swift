@@ -8,7 +8,6 @@ final class SetupCoordinator: ObservableObject {
 
     enum Step: Int, CaseIterable, Identifiable {
         case welcome
-        case homebrew
         case profile
         case apps
         case system
@@ -20,12 +19,11 @@ final class SetupCoordinator: ObservableObject {
 
         /// Steps shown in the top progress indicator. Welcome and Done sit outside the dotted track.
         static var trackedSteps: [Step] {
-            [.homebrew, .profile, .apps, .system, .review, .install]
+            [.profile, .apps, .system, .review, .install]
         }
 
         var trackTitle: String {
             switch self {
-            case .homebrew: "Tools"
             case .profile:  "Profile"
             case .apps:     "Apps"
             case .system:   "System"
@@ -36,28 +34,27 @@ final class SetupCoordinator: ObservableObject {
         }
     }
 
-    enum HomebrewStatus: Equatable {
-        case checking
-        case installed
-        case notInstalled
-        case installing
-        case uninstalling
-        case failed(String)
-    }
-
     enum ItemStatus: Equatable {
         case pending
+        case downloading(Double)
+        case verifying
         case installing
+        case waitingForPassword
         case succeeded
-        case failed
+        case failed(String)
         case skipped   // already installed; no work needed
+
+        var isFinished: Bool {
+            switch self {
+            case .succeeded, .failed, .skipped: true
+            default: false
+            }
+        }
     }
 
     // MARK: - State
 
     @Published var currentStep: Step = .welcome
-
-    @Published var homebrewStatus: HomebrewStatus = .checking
 
     @Published var selectedProfile: SetupProfile?
     @Published var selectedApps: [AppEntry] = []
@@ -71,13 +68,23 @@ final class SetupCoordinator: ObservableObject {
     @Published var failedItems: [String] = []
 
     /// Pre-loaded at app launch.
-    @Published var installedCasks: Set<String> = []
-    /// Lowercased, space-stripped names of every .app under /Applications.
+    /// Exact bundle names ("Google Chrome.app") in /Applications and ~/Applications.
+    @Published var installedBundles: Set<String> = []
+    /// Lowercased, space-stripped names of the same bundles, for loose matching.
     @Published var installedAppNames: Set<String> = []
+    /// Casks and formulae Homebrew already manages (empty without Homebrew).
+    @Published var installedCasks: Set<String> = []
+    @Published var installedFormulae: Set<String> = []
     @Published var installedStateLoaded: Bool = false
 
     let shell = ShellRunner()
+    let catalog = CaskCatalog.shared
+    private let installer = DirectInstaller()
     private var cancellables = Set<AnyCancellable>()
+
+    static var installLogPath: String {
+        AppLog.logFileURL.deletingLastPathComponent().appending(path: "install.log").path
+    }
 
     init() {
         // Bridge Debug menu's step jumps into the coordinator.
@@ -92,26 +99,22 @@ final class SetupCoordinator: ObservableObject {
             }
             .store(in: &cancellables)
 
-        // When the no-brew override flips, re-run detection so the UI updates live
-        // without needing the user to navigate away and back.
-        DebugState.shared.$forceNoBrew
-            .dropFirst()
-            .removeDuplicates()
+        // Forward ShellRunner's @Published changes to our own observers so views
+        // that derive UI from `coordinator.shell.output` re-render in real time.
+        //
+        // Throttled to 10/sec — without it, per-line output during an install
+        // fans out hundreds of publishes/sec to every observing view, which can
+        // trigger SwiftUI's "publishing changes from within view updates" panic.
+        shell.objectWillChange
+            .throttle(for: .milliseconds(100), scheduler: DispatchQueue.main, latest: true)
             .sink { [weak self] _ in
-                Task { await self?.preflight() }
+                self?.objectWillChange.send()
             }
             .store(in: &cancellables)
 
-        // Forward ShellRunner's @Published changes to our own observers so views
-        // that derive UI from `coordinator.shell.output` (e.g. the staged brew
-        // install progress bar) re-render in real time.
-        //
-        // Throttled to 10/sec — without it, brew's per-line output during an
-        // install fans out hundreds of publishes/sec to every observing view,
-        // which can trigger SwiftUI's "publishing changes from within view
-        // updates" panic and freeze/crash the UI.
-        shell.objectWillChange
-            .throttle(for: .milliseconds(100), scheduler: DispatchQueue.main, latest: true)
+        // Availability badges depend on the catalog, which loads in the background.
+        catalog.objectWillChange
+            .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
                 self?.objectWillChange.send()
             }
@@ -120,11 +123,12 @@ final class SetupCoordinator: ObservableObject {
 
     // MARK: - Preflight
 
-    /// Called from SetupContainerView.task at launch. Detects Homebrew and pre-loads
-    /// the user's installed apps so AppsStep has data ready before they arrive.
+    /// Called from SetupContainerView.task at launch. Loads Homebrew's app catalog
+    /// and scans what's already installed so the Apps step has data ready.
     func preflight() async {
-        await checkHomebrew()
+        async let catalogLoad: Void = catalog.load()
         await loadInstalledState()
+        await catalogLoad
     }
 
     // MARK: - Navigation
@@ -156,7 +160,6 @@ final class SetupCoordinator: ObservableObject {
     var canGoNext: Bool {
         switch currentStep {
         case .welcome: true
-        case .homebrew: homebrewStatus == .installed
         case .profile: !selectedApps.isEmpty || selectedProfile != nil
         case .apps: !selectedApps.isEmpty
         case .system: true
@@ -169,15 +172,6 @@ final class SetupCoordinator: ObservableObject {
     var primaryActionTitle: String {
         switch currentStep {
         case .welcome: "Get Started"
-        case .homebrew:
-            switch homebrewStatus {
-            case .installed: "Continue"
-            case .notInstalled: "Install Homebrew"
-            case .installing: "Installing…"
-            case .uninstalling: "Uninstalling…"
-            case .checking: "Checking…"
-            case .failed: "Try Again"
-            }
         case .review: "Begin Setup"
         case .install: installComplete ? "Continue" : "Installing…"
         case .done: "Quit"
@@ -185,218 +179,19 @@ final class SetupCoordinator: ObservableObject {
         }
     }
 
-    // MARK: - Homebrew
-
-    func checkHomebrew() async {
-        if DebugState.shared.forceNoBrew {
-            AppLog.info(.homebrew, "Forced not-installed (debug override)")
-            homebrewStatus = .notInstalled
-            return
-        }
-        homebrewStatus = .checking
-        try? await Task.sleep(for: .milliseconds(300))
-        let paths = ["/opt/homebrew/bin/brew", "/usr/local/bin/brew"]
-        let found = paths.contains { FileManager.default.fileExists(atPath: $0) }
-        AppLog.info(.homebrew, "Detection: \(found ? "installed" : "not installed")")
-        homebrewStatus = found ? .installed : .notInstalled
-    }
-
-    func installHomebrew() async {
-        AppLog.info(.homebrew, "Install requested")
-        homebrewStatus = .installing
-
-        // Debug override — simulate failure without touching the system.
-        if DebugState.shared.forceBrewInstallFails {
-            AppLog.warn(.homebrew, "Simulating install failure (debug)")
-            try? await Task.sleep(for: .seconds(2))
-            homebrewStatus = .failed("Simulated failure (debug mode is on).")
-            return
-        }
-
-        // Xcode Command Line Tools are required by brew (for git, gcc, etc).
-        // Surface this before asking for the admin password.
-        if !xcodeCommandLineToolsInstalled() {
-            AppLog.warn(.homebrew, "Xcode CLT missing; triggering system installer")
-            homebrewStatus = .failed(
-                "Xcode Command Line Tools are required first. We'll open the installer — accept it, wait for it to finish, then click Try Again."
-            )
-            triggerXcodeCommandLineToolsInstaller()
-            return
-        }
-
-        let userName = NSUserName()
-        let prefix = "/opt/homebrew"
-
-        // Manual install — the official `install.sh` aborts when run as root, but
-        // `osascript with administrator privileges` runs us as root. So we do the
-        // privileged steps ourselves, then drop back to the user (`sudo -u`) for
-        // anything brew refuses to do as root.
-        // Stage markers (STAGE_X) drive the staged progress bar in the UI.
-        // We split download and extract into separate steps (via a temp tarball) so
-        // each transition produces a visible change for the user.
-        let installCommand = """
-        set -e
-        USER_NAME='\(userName)'
-        PREFIX='\(prefix)'
-        TARBALL='/tmp/the_setup_engine_brew.tar.gz'
-
-        # --- defensive guards (root context — bugs here would be catastrophic) ---
-        # Refuse if any required variable is missing or unexpected. Belt and braces:
-        # we set them ourselves, but we run as root so we're paranoid about anything
-        # that touches the filesystem.
-        if [ -z "$USER_NAME" ] || [ "$USER_NAME" = "root" ]; then
-            echo "ERROR: invalid user '$USER_NAME'"; exit 1
-        fi
-        if [ "$PREFIX" != "/opt/homebrew" ]; then
-            echo "ERROR: prefix must be /opt/homebrew, got '$PREFIX'"; exit 1
-        fi
-        if [ ! -d "/Users/$USER_NAME" ]; then
-            echo "ERROR: home directory for '$USER_NAME' not found"; exit 1
-        fi
-
-        echo "STAGE_PREPARING"
-        if [ -d "$PREFIX" ] && [ ! -f "$PREFIX/bin/brew" ]; then
-            # Reassert PREFIX is what we expect before any rm — we run as root.
-            [ "$PREFIX" = "/opt/homebrew" ] || exit 1
-            rm -rf "$PREFIX"/* 2>/dev/null || true
-            rm -rf "$PREFIX"/.??* 2>/dev/null || true
-        fi
-        mkdir -p "$PREFIX"
-        chown -R "$USER_NAME": "$PREFIX"
-        chmod -R u+rwX,g+rX,o+rX "$PREFIX"
-
-        echo "STAGE_DOWNLOADING"
-        sudo -u "$USER_NAME" /bin/bash -c "
-            set -e
-            curl -fsSL https://github.com/Homebrew/brew/tarball/main -o '$TARBALL'
-        "
-
-        echo "STAGE_EXTRACTING"
-        sudo -u "$USER_NAME" /bin/bash -c "
-            set -e
-            cd '$PREFIX'
-            tar xz --strip 1 -f '$TARBALL'
-        "
-        rm -f "$TARBALL"
-
-        echo "STAGE_CONFIGURING"
-        sudo -u "$USER_NAME" "$PREFIX/bin/brew" update --force --quiet 2>&1 || true
-
-        ZPROFILE="/Users/$USER_NAME/.zprofile"
-        if [ ! -f "$ZPROFILE" ] || ! grep -q "brew shellenv" "$ZPROFILE"; then
-            echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> "$ZPROFILE"
-            chown "$USER_NAME": "$ZPROFILE"
-        fi
-
-        echo "INSTALL_OK"
-        """
-
-        let success = await shell.runWithAdmin(installCommand)
-        let paths = ["/opt/homebrew/bin/brew", "/usr/local/bin/brew"]
-        let found = paths.contains { FileManager.default.fileExists(atPath: $0) }
-
-        if success || found {
-            AppLog.info(.homebrew, "Install completed successfully")
-            homebrewStatus = .installed
-            await loadInstalledState()
-        } else if shell.output.isEmpty {
-            AppLog.warn(.homebrew, "Install cancelled (no output)")
-            homebrewStatus = .failed("Installation was cancelled.")
-        } else {
-            let msg = friendlyError(from: shell.output)
-            AppLog.error(.homebrew, "Install failed: \(msg)")
-            homebrewStatus = .failed(msg)
-        }
-    }
-
-    private func xcodeCommandLineToolsInstalled() -> Bool {
-        // Either CLT-only install or full Xcode satisfies brew.
-        FileManager.default.fileExists(atPath: "/Library/Developer/CommandLineTools/usr/bin/git")
-            || FileManager.default.fileExists(atPath: "/Applications/Xcode.app")
-    }
-
-    private func triggerXcodeCommandLineToolsInstaller() {
-        let p = Process()
-        p.executableURL = URL(fileURLWithPath: "/usr/bin/xcode-select")
-        p.arguments = ["--install"]
-        try? p.run()
-    }
-
-    /// Removes /opt/homebrew and the brew shellenv line from the user's ~/.zprofile.
-    /// Useful for testing the no-brew flow on a real machine.
-    func uninstallHomebrew() async {
-        AppLog.info(.homebrew, "Uninstall requested")
-        homebrewStatus = .uninstalling
-
-        let userName = NSUserName()
-        let uninstallCommand = """
-        set -e
-        USER_NAME='\(userName)'
-
-        # --- defensive guards ---
-        # Hard-coded paths only. Refuse if user is empty/root or home doesn't exist.
-        if [ -z "$USER_NAME" ] || [ "$USER_NAME" = "root" ]; then
-            echo "ERROR: invalid user '$USER_NAME'"; exit 1
-        fi
-        if [ ! -d "/Users/$USER_NAME" ]; then
-            echo "ERROR: home directory for '$USER_NAME' not found"; exit 1
-        fi
-
-        # Each rm has its target literally in the script — no variable interpolation
-        # near the slash. Belt and braces.
-        if [ -d /opt/homebrew ]; then
-            rm -rf /opt/homebrew 2>/dev/null || true
-        fi
-        if [ -d /usr/local/Homebrew ]; then
-            rm -rf /usr/local/Homebrew 2>/dev/null || true
-        fi
-
-        CACHE="/Users/$USER_NAME/Library/Caches/Homebrew"
-        LOGS="/Users/$USER_NAME/Library/Logs/Homebrew"
-        [ -d "$CACHE" ] && rm -rf "$CACHE"
-        [ -d "$LOGS" ] && rm -rf "$LOGS"
-
-        ZPROFILE="/Users/$USER_NAME/.zprofile"
-        if [ -f "$ZPROFILE" ]; then
-            sed -i '' '/brew shellenv/d' "$ZPROFILE"
-        fi
-        echo "UNINSTALL_OK"
-        """
-
-        _ = await shell.runWithAdmin(uninstallCommand)
-
-        // Re-detect rather than assuming success — the user might have cancelled.
-        await checkHomebrew()
-        installedCasks = []
-    }
-
-    private func friendlyError(from output: String) -> String {
-        let lower = output.lowercased()
-        if lower.contains("don't run this as root") {
-            return "Internal install error — please report this. (Tried to run as root.)"
-        }
-        if lower.contains("xcode-select") || lower.contains("command line tools") {
-            return "Xcode Command Line Tools are required. Run xcode-select --install in Terminal."
-        }
-        if lower.contains("could not resolve") || lower.contains("network") || lower.contains("curl: ") {
-            return "Couldn't reach Homebrew's servers. Check your internet connection and try again."
-        }
-        if lower.contains("permission denied") {
-            return "Permission denied. Try running setup again and approve the password prompt."
-        }
-        return "Installation didn't finish. Try again or visit brew.sh."
-    }
-
     // MARK: - Installed-state preload
 
-    /// Scans /Applications and runs `brew list --cask` so we know what's already on the user's Mac.
-    /// Safe to call before brew is installed — `brew list` just returns empty.
+    /// Scans /Applications and asks Homebrew (if present) what it manages, so we
+    /// know what's already on the user's Mac.
     func loadInstalledState() async {
-        async let appNames = scanApplications()
-        async let casks = brewListedCasks()
-        let (names, list) = await (appNames, casks)
-        installedAppNames = names
-        installedCasks = list
+        async let bundles = scanApplications()
+        async let casks = HomebrewSupport.installedCasks()
+        async let formulae = HomebrewSupport.installedFormulae()
+        let (b, c, f) = await (bundles, casks, formulae)
+        installedBundles = b
+        installedAppNames = Set(b.map { Self.normalize(($0 as NSString).deletingPathExtension) })
+        installedCasks = c
+        installedFormulae = f
         installedStateLoaded = true
     }
 
@@ -406,58 +201,52 @@ final class SetupCoordinator: ObservableObject {
             var out: Set<String> = []
             for dir in dirs {
                 guard let items = try? FileManager.default.contentsOfDirectory(atPath: dir) else { continue }
-                for item in items where item.hasSuffix(".app") {
-                    let name = (item as NSString).deletingPathExtension
-                    out.insert(Self.normalize(name))
-                }
+                out.formUnion(items.filter { $0.hasSuffix(".app") })
             }
             return out
         }.value
     }
 
-    private func brewListedCasks() async -> Set<String> {
-        guard homebrewStatus == .installed else { return [] }
-        return await Task.detached {
-            let p = Process()
-            p.executableURL = URL(fileURLWithPath: "/bin/zsh")
-            p.arguments = ["-c", "brew list --cask"]
-            p.environment = ShellRunner.brewEnvironment()
-            let pipe = Pipe()
-            p.standardOutput = pipe
-            p.standardError = Pipe()
-            do {
-                try p.run()
-                p.waitUntilExit()
-                let data = pipe.fileHandleForReading.readDataToEndOfFile()
-                let output = String(data: data, encoding: .utf8) ?? ""
-                return Set(
-                    output
-                        .components(separatedBy: .newlines)
-                        .map { $0.trimmingCharacters(in: .whitespaces) }
-                        .filter { !$0.isEmpty }
-                )
-            } catch {
-                return []
-            }
-        }.value
-    }
-
-    private static func normalize(_ s: String) -> String {
+    nonisolated private static func normalize(_ s: String) -> String {
         s.lowercased()
             .replacingOccurrences(of: " ", with: "")
             .replacingOccurrences(of: "-", with: "")
     }
 
-    /// True if the app appears installed on this Mac, by either cask or /Applications match.
+    /// True if the app or tool is already on this Mac.
     func isInstalled(_ app: AppEntry) -> Bool {
+        if app.kind == .commandLine { return installedFormulae.contains(app.caskName) }
         if installedCasks.contains(app.caskName) { return true }
+
+        // Best signal: the exact bundle names Homebrew's catalog says this app installs.
+        if let cask = catalog.cask(app.caskName), !cask.installedAppNames.isEmpty {
+            return cask.installedAppNames.contains { installedBundles.contains($0) }
+        }
+
+        // Installer-package apps (or catalog not loaded yet): match by name.
         let cask = Self.normalize(app.caskName)
         let display = Self.normalize(app.displayName)
         return installedAppNames.contains(cask)
             || installedAppNames.contains(display)
-            || installedAppNames.contains { name in
-                name.contains(display) || display.contains(name)
-            }
+            || installedAppNames.contains { $0.hasPrefix(display) && display.count >= 4 }
+    }
+
+    /// Command-line tools, and the few apps whose makers only serve Homebrew,
+    /// are installed through Homebrew. Everything else is installed directly.
+    func usesHomebrew(_ app: AppEntry) -> Bool {
+        app.kind == .commandLine || Suggestions.homebrewOnly.contains(app.caskName)
+    }
+
+    /// Why this app can't be installed on this Mac, or nil if it can.
+    func unavailableReason(_ app: AppEntry) -> String? {
+        if app.kind == .app, let why = catalog.cask(app.caskName)?.unavailableReason { return why }
+        guard usesHomebrew(app), let why = HomebrewSupport.unavailableReason else { return nil }
+        return app.kind == .app ? "Its maker only allows downloads through Homebrew" : why
+    }
+
+    /// True if installing this app will ask for the Mac's password.
+    func needsPassword(_ app: AppEntry) -> Bool {
+        !usesHomebrew(app) && catalog.cask(app.caskName)?.record.needsAdmin == true
     }
 
     // MARK: - Apps
@@ -476,17 +265,17 @@ final class SetupCoordinator: ObservableObject {
 
     func apply(profile: SetupProfile) {
         selectedProfile = profile
-        // Skip apps already on the Mac — no point queuing an install we'll
-        // immediately skip. Keeps the Selected sidebar focused on actual work.
+        // Skip apps already on the Mac or unavailable here — no point queuing an
+        // install we'll immediately skip. Keeps the Selected sidebar focused.
         for cask in profile.casks
-            where !isSelected(cask) && !isInstalled(cask) {
+            where !isSelected(cask) && !isInstalled(cask) && unavailableReason(cask) == nil {
             selectedApps.append(cask)
         }
     }
 
     // MARK: - Install
 
-    /// Apps that will actually run through brew install (excluding already-installed).
+    /// Apps that will actually be installed (excluding already-installed).
     var appsToInstall: [AppEntry] {
         selectedApps.filter { !isInstalled($0) }
     }
@@ -496,63 +285,148 @@ final class SetupCoordinator: ObservableObject {
         selectedApps.filter { isInstalled($0) }
     }
 
+    /// Plain-words reason for each failed item, keyed by token.
+    @Published var failureReasons: [String: String] = [:]
+
+    private func fail(_ app: AppEntry, _ reason: String) {
+        itemStatuses[app.caskName] = .failed(reason)
+        failureReasons[app.caskName] = reason
+        if !failedItems.contains(app.displayName) { failedItems.append(app.displayName) }
+        AppLog.error(.install, "\(app.caskName): \(reason)")
+    }
+
     private func runInstall() async {
         AppLog.info(.install, "Install run started — \(selectedApps.count) selected, \(appsToInstall.count) to install")
         currentInstallIndex = 0
         installComplete = false
         failedItems = []
+        failureReasons = [:]
         settingsApplied = false
+        try? "".write(toFile: Self.installLogPath, atomically: true, encoding: .utf8)
 
         for app in selectedApps {
             itemStatuses[app.caskName] = isInstalled(app) ? .skipped : .pending
         }
+        await catalog.load()
 
-        let toFakeFail = DebugState.shared.fakeAppFailures
-        var fakedSoFar = 0
+        var fakeFailuresLeft = DebugState.shared.fakeAppFailures
+        var adminApps: [StagedApp] = []
+        var adminPkgs: [StagedPkg] = []
+        var waitingOnAdmin: [String: AppEntry] = [:]
 
-        // Reset the install log so each setup run starts fresh.
-        let logPath = "/tmp/the_setup_engine_install.log"
-        try? "".write(toFile: logPath, atomically: true, encoding: .utf8)
-
-        for (i, app) in selectedApps.enumerated() {
+        // 1. Apps: download, verify, and move into Applications (no password needed).
+        for (i, app) in selectedApps.enumerated() where !usesHomebrew(app) {
+            guard itemStatuses[app.caskName] == .pending else { continue }
             currentInstallIndex = i
 
-            if itemStatuses[app.caskName] == .skipped {
-                AppLog.info(.install, "Skipping \(app.caskName) — already installed")
-                continue
-            }
-
-            itemStatuses[app.caskName] = .installing
-            AppLog.info(.install, "Installing \(app.caskName)…")
-
-            // Debug override — simulate first N failures.
-            if fakedSoFar < toFakeFail {
-                AppLog.warn(.install, "Simulating failure for \(app.caskName) (debug)")
+            if fakeFailuresLeft > 0 {
+                fakeFailuresLeft -= 1
                 try? await Task.sleep(for: .seconds(1))
-                itemStatuses[app.caskName] = .failed
-                failedItems.append(app.displayName)
-                fakedSoFar += 1
+                fail(app, "Simulated failure (debug)")
+                continue
+            }
+            guard let cask = catalog.cask(app.caskName) else {
+                fail(app, "Couldn't find it in the app catalog. Check your internet connection.")
                 continue
             }
 
-            // Tee output to /tmp/the_setup_engine_install.log so failed installs
-            // can be diagnosed after the fact.
-            let success = await shell.run(
-                "{ echo '====='; echo \"=== \(app.caskName) — \\$(date) ===\"; echo '====='; brew install --cask \(app.caskName); } 2>&1 | tee -a \(logPath)",
-                clearOutput: false
-            )
-
-            if success {
-                AppLog.info(.install, "Installed \(app.caskName)")
-                itemStatuses[app.caskName] = .succeeded
-            } else {
-                AppLog.error(.install, "Failed: \(app.caskName) — see \(logPath)")
-                itemStatuses[app.caskName] = .failed
-                failedItems.append(app.displayName)
+            let token = app.caskName
+            let gate = ProgressGate()
+            itemStatuses[token] = .downloading(0)
+            do {
+                let staged = try await installer.stage(cask) { [weak self] p in
+                    guard gate.shouldReport(p) else { return }
+                    Task { @MainActor in
+                        guard let self, case .downloading = self.itemStatuses[token] else { return }
+                        self.itemStatuses[token] = p >= 1 ? .verifying : .downloading(p)
+                    }
+                }
+                itemStatuses[token] = .installing
+                let needAdmin = try installer.place(staged)
+                adminApps += needAdmin
+                adminPkgs += staged.pkgs
+                if needAdmin.isEmpty && staged.pkgs.isEmpty {
+                    itemStatuses[token] = .succeeded
+                    AppLog.info(.install, "Installed \(token) (signed by \(staged.signer ?? "unknown"))")
+                } else {
+                    itemStatuses[token] = .waitingForPassword
+                    waitingOnAdmin[token] = app
+                }
+            } catch let failure as InstallFailure {
+                fail(app, failure.message)
+            } catch {
+                fail(app, error.localizedDescription)
             }
         }
 
-        // System preferences
+        // 2. Command-line tools (and Homebrew-only apps) need Homebrew; stage its
+        //    installer if it's missing.
+        let tools = selectedApps.filter { usesHomebrew($0) && itemStatuses[$0.caskName] == .pending }
+        var homebrewReady = HomebrewSupport.isInstalled
+        if !tools.isEmpty && !homebrewReady {
+            if let why = HomebrewSupport.unavailableReason {
+                tools.forEach { fail($0, unavailableReason($0) ?? why) }
+            } else {
+                do {
+                    adminPkgs.append(try await HomebrewSupport.stageInstaller(in: installer.workRoot))
+                    tools.forEach { itemStatuses[$0.caskName] = .waitingForPassword }
+                } catch let failure as InstallFailure {
+                    tools.forEach { fail($0, "Couldn't get Homebrew: \(failure.message)") }
+                } catch {
+                    tools.forEach { fail($0, "Couldn't get Homebrew: \(error.localizedDescription)") }
+                }
+            }
+        }
+
+        // 3. Everything that needs the password, behind one prompt.
+        if !adminApps.isEmpty || !adminPkgs.isEmpty {
+            if let first = selectedApps.firstIndex(where: { itemStatuses[$0.caskName] == .waitingForPassword }) {
+                currentInstallIndex = first
+            }
+            let script = installer.adminScript(apps: adminApps, pkgs: adminPkgs)
+            let ran = await shell.runWithAdmin(script)
+            let ok = Set(shell.output.split(separator: "\n")
+                .filter { $0.hasPrefix("TSE_OK ") }
+                .map { String($0.dropFirst("TSE_OK ".count)) })
+
+            for (token, app) in waitingOnAdmin {
+                if ok.contains(token) { itemStatuses[token] = .succeeded }
+                else { fail(app, ran ? "The installer didn't finish" : "Password prompt was cancelled") }
+            }
+            if adminPkgs.contains(where: { $0.token == "homebrew" }) {
+                homebrewReady = ok.contains("homebrew") && HomebrewSupport.isInstalled
+                if homebrewReady {
+                    AppLog.info(.homebrew, "Homebrew installed")
+                } else {
+                    tools.filter { itemStatuses[$0.caskName] == .waitingForPassword }
+                        .forEach { fail($0, ran ? "Homebrew didn't install" : "Password prompt was cancelled") }
+                }
+            }
+        }
+
+        // 4. Command-line tools and Homebrew-only apps, through Homebrew.
+        if homebrewReady {
+            for (i, tool) in selectedApps.enumerated() where usesHomebrew(tool) {
+                let status = itemStatuses[tool.caskName]
+                guard status == .pending || status == .waitingForPassword else { continue }
+                currentInstallIndex = i
+                itemStatuses[tool.caskName] = .installing
+                guard let command = HomebrewSupport.installCommand(tool.caskName, cask: tool.kind == .app) else {
+                    fail(tool, "Not a valid Homebrew formula name")
+                    continue
+                }
+                let success = await shell.run(
+                    "{ echo '=== \(tool.caskName) ==='; \(command); } 2>&1 | tee -a \(DirectInstaller.quote(Self.installLogPath)); exit ${pipestatus[1]}",
+                    clearOutput: false
+                )
+                if success { itemStatuses[tool.caskName] = .succeeded }
+                else { fail(tool, "Homebrew couldn't install it — see the install log") }
+            }
+        }
+
+        installer.cleanUpAll()
+
+        // 5. System preferences
         let script = settings.commandLine()
         if !script.isEmpty {
             AppLog.info(.settings, "Applying system preferences")
@@ -560,8 +434,24 @@ final class SetupCoordinator: ObservableObject {
         }
         settingsApplied = true
 
+        await loadInstalledState()
         AppLog.info(.install, "Install run complete — \(failedItems.count) failures")
         installComplete = true
+    }
+}
+
+/// Lets download progress through at most every 2%, so a fast download
+/// doesn't flood the main thread with UI updates.
+nonisolated final class ProgressGate: @unchecked Sendable {
+    private let lock = NSLock()
+    private var last = -1.0
+
+    func shouldReport(_ value: Double) -> Bool {
+        lock.lock()
+        defer { lock.unlock() }
+        guard value >= 1 || value - last >= 0.02 else { return false }
+        last = value
+        return true
     }
 }
 

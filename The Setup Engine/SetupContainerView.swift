@@ -23,7 +23,6 @@ struct SetupContainerView: View {
                 Group {
                     switch coordinator.currentStep {
                     case .welcome:  WelcomeStep()
-                    case .homebrew: HomebrewStep()
                     case .profile:  ProfileStep()
                     case .apps:     AppsStep()
                     case .system:   SystemStep()
@@ -129,25 +128,6 @@ struct SetupContainerView: View {
     @ViewBuilder
     private var primaryButton: some View {
         switch coordinator.currentStep {
-        case .homebrew:
-            switch coordinator.homebrewStatus {
-            case .notInstalled, .failed:
-                Button(coordinator.primaryActionTitle) {
-                    Task { await coordinator.installHomebrew() }
-                }
-                .buttonStyle(.borderedProminent)
-                .controlSize(.large)
-            case .installed:
-                Button("Continue") { coordinator.next() }
-                    .buttonStyle(.borderedProminent)
-                    .controlSize(.large)
-            default:
-                Button(coordinator.primaryActionTitle) {}
-                    .buttonStyle(.borderedProminent)
-                    .controlSize(.large)
-                    .disabled(true)
-            }
-
         case .done:
             Button("Quit") { NSApp.terminate(nil) }
                 .buttonStyle(.borderedProminent)

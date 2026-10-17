@@ -37,7 +37,8 @@ struct InstallStep: View {
         let total = coordinator.selectedApps.count
         let idx   = min(coordinator.currentInstallIndex, max(0, total - 1))
         let current = total > 0 ? coordinator.selectedApps[idx] : nil
-        let isSkipped = current.map { coordinator.itemStatuses[$0.caskName] == .skipped } ?? false
+        let status = current.flatMap { coordinator.itemStatuses[$0.caskName] }
+        let isSkipped = status == .skipped
 
         return VStack(spacing: 16) {
             ZStack {
@@ -62,6 +63,13 @@ struct InstallStep: View {
                         .padding(6)
                         .background(.regularMaterial, in: Circle())
                         .offset(x: 8, y: 8)
+                } else if status == .waitingForPassword {
+                    Image(systemName: "lock.circle.fill")
+                        .font(.title2)
+                        .foregroundStyle(.tint)
+                        .padding(6)
+                        .background(.regularMaterial, in: Circle())
+                        .offset(x: 8, y: 8)
                 } else {
                     ProgressView()
                         .controlSize(.regular)
@@ -72,33 +80,57 @@ struct InstallStep: View {
             }
 
             VStack(spacing: 4) {
-                Text(headline(for: current, isSkipped: isSkipped))
+                Text(headline(for: current, status: status))
                     .font(.system(size: 22, weight: .semibold))
+                    .multilineTextAlignment(.center)
 
-                Text(total > 0
-                     ? "App \(idx + 1) of \(total)"
-                     : "Applying your settings")
+                Text(subline(total: total, index: idx, status: status))
                     .font(.callout)
                     .foregroundStyle(.secondary)
+                    .monospacedDigit()
             }
         }
     }
 
-    private func headline(for app: AppEntry?, isSkipped: Bool) -> String {
+    private func headline(for app: AppEntry?, status: SetupCoordinator.ItemStatus?) -> String {
         guard let app else { return "Applying your settings…" }
-        if isSkipped { return "\(app.displayName) — already installed" }
-        return "Installing \(app.displayName)…"
+        switch status {
+        case .skipped:            return "\(app.displayName) — already installed"
+        case .downloading:        return "Downloading \(app.displayName)…"
+        case .verifying:          return "Checking \(app.displayName) with Apple…"
+        case .waitingForPassword: return "Enter your Mac's password to finish"
+        case .failed:             return "\(app.displayName) didn't install"
+        default:                  return "Installing \(app.displayName)…"
+        }
+    }
+
+    private func subline(total: Int, index: Int, status: SetupCoordinator.ItemStatus?) -> String {
+        guard total > 0 else { return "Applying your settings" }
+        switch status {
+        case .downloading(let p):
+            return "App \(index + 1) of \(total) · \(Int(p * 100))%"
+        case .waitingForPassword:
+            let waiting = coordinator.selectedApps
+                .filter { coordinator.itemStatuses[$0.caskName] == .waitingForPassword }
+                .map(\.displayName)
+            return "Needed for " + ListFormatter.localizedString(byJoining: waiting)
+        default:
+            return "App \(index + 1) of \(total)"
+        }
     }
 
     private var progressBar: some View {
         let total = max(1, coordinator.selectedApps.count)
         let done = coordinator.selectedApps.filter {
-            switch coordinator.itemStatuses[$0.caskName] {
-            case .succeeded, .failed, .skipped: true
-            default: false
-            }
+            coordinator.itemStatuses[$0.caskName]?.isFinished == true
         }.count
-        let value = Double(done) / Double(total)
+        // Count the current download's progress so the bar moves during big downloads.
+        let partial = coordinator.selectedApps.reduce(0.0) { sum, app in
+            if case .downloading(let p) = coordinator.itemStatuses[app.caskName] { return sum + p * 0.8 }
+            if coordinator.itemStatuses[app.caskName] == .verifying { return sum + 0.85 }
+            return sum
+        }
+        let value = min(1, (Double(done) + partial) / Double(total))
 
         return VStack(spacing: 6) {
             ProgressView(value: value)
@@ -138,16 +170,22 @@ struct InstallStep: View {
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
             } else {
-                VStack(spacing: 6) {
+                VStack(alignment: .leading, spacing: 8) {
                     Text("Some apps couldn't be installed:")
                         .font(.callout)
                         .foregroundStyle(.secondary)
-                    Text(coordinator.failedItems.joined(separator: ", "))
-                        .font(.callout.weight(.medium))
-                        .foregroundStyle(.orange)
-                        .multilineTextAlignment(.center)
-                        .frame(maxWidth: 480)
+                    ForEach(coordinator.selectedApps.filter { coordinator.failureReasons[$0.caskName] != nil }) { app in
+                        HStack(alignment: .firstTextBaseline, spacing: 6) {
+                            Text(app.displayName)
+                                .font(.callout.weight(.semibold))
+                                .foregroundStyle(.orange)
+                            Text(coordinator.failureReasons[app.caskName] ?? "")
+                                .font(.callout)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
                 }
+                .frame(maxWidth: 540, alignment: .leading)
             }
 
             Spacer()

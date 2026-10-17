@@ -7,9 +7,10 @@ import Foundation
 /// Usage:
 ///   AppLog.info(.install, "Starting install of \(cask)")
 ///   AppLog.error(.homebrew, "Install failed: \(message)")
-enum AppLog {
+nonisolated enum AppLog {
     enum Category: String {
         case general
+        case catalog
         case homebrew
         case install
         case settings
@@ -48,8 +49,8 @@ enum AppLog {
     static var allLogPaths: [String] {
         [
             logFileURL.path,
-            "/tmp/the_setup_engine_admin.log",
-            "/tmp/the_setup_engine_install.log",
+            logFileURL.deletingLastPathComponent().appending(path: "admin.log").path,
+            logFileURL.deletingLastPathComponent().appending(path: "install.log").path,
         ]
     }
 

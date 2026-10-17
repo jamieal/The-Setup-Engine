@@ -1,0 +1,43 @@
+name: Catalog check
+
+# Weekly: make sure every curated app still exists in Homebrew's catalog and
+# hasn't been deprecated or disabled (Homebrew disables apps that fail Apple's
+# Gatekeeper check), then open a PR refreshing the bundled snapshot.
+on:
+  schedule:
+    - cron: "0 9 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check curated apps and their download links
+        run: python3 scripts/update-catalog-snapshot.py --probe
+
+      - name: Refresh snapshot
+        if: always()
+        run: python3 scripts/update-catalog-snapshot.py
+
+      - name: Open PR if the snapshot changed
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if git diff --quiet; then
+            echo "Snapshot unchanged."
+            exit 0
+          fi
+          branch="catalog-snapshot-$(date +%Y-%m-%d)"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$branch"
+          git commit -am "Refresh bundled catalog snapshot"
+          git push -u origin "$branch"
+          gh pr create --fill --base "${{ github.event.repository.default_branch }}"

@@ -48,7 +48,7 @@ struct AppCommands: Commands {
         let body = """
         A guided macOS setup workflow built with SwiftUI.
 
-        Installs apps via Homebrew Cask, configures system preferences, all without touching Terminal.
+        Installs apps straight from their makers, checks each one with Apple, and configures system preferences, all without touching Terminal.
 
         github.com/jamieal/The-Setup-Engine
         """

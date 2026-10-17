@@ -171,9 +171,11 @@ struct AppsStep: View {
     private func appRow(_ app: AppEntry) -> some View {
         let installed = coordinator.isInstalled(app)
         let selected = coordinator.isSelected(app)
+        let unavailable = installed ? nil : coordinator.unavailableReason(app)
+        let inactive = installed || unavailable != nil
 
         return Button {
-            guard !installed else { return }
+            guard !inactive else { return }
             withAnimation(.spring(response: 0.25)) {
                 coordinator.toggle(app)
             }
@@ -193,6 +195,14 @@ struct AppsStep: View {
                                 .padding(.horizontal, 5)
                                 .padding(.vertical, 1)
                                 .background(Color.green.opacity(0.15), in: Capsule())
+                        } else if let unavailable {
+                            Text(unavailable)
+                                .font(.caption2.weight(.semibold))
+                                .foregroundStyle(.secondary)
+                                .padding(.horizontal, 5)
+                                .padding(.vertical, 1)
+                                .background(Color.secondary.opacity(0.15), in: Capsule())
+                                .lineLimit(1)
                         } else if let label = app.pricing.shortLabel {
                             let isFreemium = app.pricing == .freemium
                             Text(label)
@@ -220,6 +230,10 @@ struct AppsStep: View {
                     Image(systemName: "checkmark.circle.fill")
                         .font(.title3)
                         .foregroundStyle(.green)
+                } else if unavailable != nil {
+                    Image(systemName: "minus.circle")
+                        .font(.title3)
+                        .foregroundStyle(.tertiary)
                 } else {
                     Image(systemName: selected ? "checkmark.circle.fill" : "plus.circle")
                         .font(.title3)
@@ -229,12 +243,13 @@ struct AppsStep: View {
             .padding(8)
             .background(
                 RoundedRectangle(cornerRadius: 10)
-                    .fill(selected && !installed ? Color.accentColor.opacity(0.08) : Color.clear)
+                    .fill(selected && !inactive ? Color.accentColor.opacity(0.08) : Color.clear)
             )
-            .opacity(installed ? 0.55 : 1.0)
+            .opacity(inactive ? 0.55 : 1.0)
         }
         .buttonStyle(.plain)
-        .disabled(installed)
+        .disabled(inactive)
+        .help(unavailable ?? "")
     }
 
     // MARK: - Selected column
@@ -318,12 +333,7 @@ struct AppsStep: View {
         isSearching = true
         defer { isSearching = false }
 
-        let names = await BrewSearch.searchNames(query: q)
-        guard !names.isEmpty else {
-            searchResults = []
-            return
-        }
-        searchResults = await BrewSearch.info(for: Array(names.prefix(20)))
+        searchResults = await CatalogSearch.search(q)
     }
 }
 

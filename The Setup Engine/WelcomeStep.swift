@@ -35,7 +35,6 @@ struct WelcomeStep: View {
 
             Button {
                 coordinator.next()
-                Task { await coordinator.checkHomebrew() }
             } label: {
                 Text("Get Started")
                     .font(.body.weight(.semibold))

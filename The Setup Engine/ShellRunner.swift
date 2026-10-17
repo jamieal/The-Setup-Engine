@@ -17,8 +17,12 @@ class ShellRunner: ObservableObject {
     /// Homebrew PATH — covers both Apple Silicon and Intel installs.
     static let brewPaths = "/opt/homebrew/bin:/usr/local/bin"
 
-    /// Fixed log path for admin operations — check this for debugging.
-    static let adminLogPath = "/tmp/the_setup_engine_admin.log"
+    /// Log for admin operations — check this for debugging. Lives in the user's
+    /// own Logs folder rather than shared /tmp, so other accounts can't tamper
+    /// with a file that root writes to.
+    nonisolated static var adminLogPath: String {
+        AppLog.logFileURL.deletingLastPathComponent().appending(path: "admin.log").path
+    }
 
     /// Builds an environment dictionary with Homebrew on the PATH.
     static func brewEnvironment() -> [String: String] {
@@ -91,7 +95,9 @@ class ShellRunner: ObservableObject {
         defer { isRunning = false }
 
         let logPath = Self.adminLogPath
-        let scriptPath = "/tmp/the_setup_engine_run.sh"
+        // Per-user temp folder (mode 700), not /tmp: root runs this file.
+        let scriptPath = FileManager.default.temporaryDirectory
+            .appending(path: "the_setup_engine_run-\(UUID().uuidString).sh").path
 
         let scriptContent = """
         #!/bin/bash

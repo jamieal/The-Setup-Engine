@@ -21,6 +21,8 @@ struct ReviewStep: View {
 
             pricingHeadsUp
 
+            passwordHeadsUp
+
             estimateLine
 
             Spacer(minLength: 0)
@@ -61,6 +63,31 @@ struct ReviewStep: View {
                     .font(.caption)
                 }
             }
+            .padding(12)
+            .frame(maxWidth: 880, alignment: .leading)
+            .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))
+            .padding(.horizontal, 40)
+        }
+    }
+
+    /// Tells people up front when, and why, they'll be asked for their password.
+    @ViewBuilder
+    private var passwordHeadsUp: some View {
+        let pkgApps = coordinator.appsToInstall.filter { coordinator.needsPassword($0) }
+        let needsHomebrew = !HomebrewSupport.isInstalled
+            && coordinator.appsToInstall.contains { coordinator.usesHomebrew($0) }
+        let reasons = (pkgApps.isEmpty ? [] : [ListFormatter.localizedString(byJoining: pkgApps.map(\.displayName))])
+            + (needsHomebrew ? ["Homebrew, which some of your picks need"] : [])
+
+        if !reasons.isEmpty {
+            HStack(alignment: .firstTextBaseline, spacing: 6) {
+                Image(systemName: "lock.fill")
+                    .foregroundStyle(.tint)
+                Text("You'll be asked for your Mac's password once, to install ")
+                    + Text(reasons.joined(separator: " and ")).fontWeight(.semibold)
+                    + Text(".")
+            }
+            .font(.caption)
             .padding(12)
             .frame(maxWidth: 880, alignment: .leading)
             .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12))

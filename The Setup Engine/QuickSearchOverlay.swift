@@ -227,78 +227,24 @@ struct QuickSearchOverlay: View {
         isSearching = true
         defer { isSearching = false }
 
-        let names = await BrewSearch.searchNames(query: q)
-        guard !names.isEmpty else {
-            results = []
-            highlightIndex = 0
-            return
-        }
-        results = await BrewSearch.info(for: Array(names.prefix(20)))
+        results = await CatalogSearch.search(q)
         highlightIndex = 0
     }
 }
 
-/// Shared brew search helpers — used by AppsStep and the Cmd+K overlay.
-enum BrewSearch {
-    static func searchNames(query: String) async -> [String] {
-        await Task.detached {
-            let p = Process()
-            p.executableURL = URL(fileURLWithPath: "/bin/zsh")
-            p.arguments = ["-c", "brew search --casks \(query)"]
-            p.environment = ShellRunner.brewEnvironment()
-            let pipe = Pipe()
-            p.standardOutput = pipe
-            p.standardError = Pipe()
-            do {
-                try p.run()
-                p.waitUntilExit()
-                let data = pipe.fileHandleForReading.readDataToEndOfFile()
-                let output = String(data: data, encoding: .utf8) ?? ""
-                return output
-                    .components(separatedBy: .newlines)
-                    .map { $0.trimmingCharacters(in: .whitespaces) }
-                    .filter { !$0.isEmpty && !$0.contains("==>") }
-            } catch {
-                return []
-            }
-        }.value
-    }
-
-    static func info(for names: [String]) async -> [AppEntry] {
-        await Task.detached {
-            let joined = names.joined(separator: " ")
-            let p = Process()
-            p.executableURL = URL(fileURLWithPath: "/bin/zsh")
-            p.arguments = ["-c", "brew info --json=v2 --cask \(joined)"]
-            p.environment = ShellRunner.brewEnvironment()
-            let pipe = Pipe()
-            p.standardOutput = pipe
-            p.standardError = Pipe()
-            do {
-                try p.run()
-                p.waitUntilExit()
-                let data = pipe.fileHandleForReading.readDataToEndOfFile()
-                if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-                   let casks = json["casks"] as? [[String: Any]] {
-                    return casks.compactMap { c in
-                        guard let token = c["token"] as? String else { return nil }
-                        let displayName = (c["name"] as? [String])?.first
-                            ?? token.replacingOccurrences(of: "-", with: " ").capitalized
-                        return AppEntry(
-                            caskName: token,
-                            displayName: displayName,
-                            homepageURL: c["homepage"] as? String,
-                            desc: c["desc"] as? String
-                        )
-                    }
-                }
-            } catch {}
-            return names.map { name in
-                AppEntry(
-                    caskName: name,
-                    displayName: name.replacingOccurrences(of: "-", with: " ").capitalized
-                )
-            }
-        }.value
+/// Shared catalog search — used by AppsStep and the Cmd+K overlay. Searches
+/// Homebrew's public app catalog locally; Homebrew itself isn't needed.
+enum CatalogSearch {
+    static func search(_ query: String) async -> [AppEntry] {
+        let catalog = CaskCatalog.shared
+        await catalog.load()
+        return catalog.search(query).map { cask in
+            AppEntry(
+                caskName: cask.token,
+                displayName: cask.record.name,
+                homepageURL: cask.record.homepage,
+                desc: cask.record.desc
+            )
+        }
     }
 }

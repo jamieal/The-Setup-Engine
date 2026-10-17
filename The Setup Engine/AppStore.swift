@@ -5,56 +5,44 @@
 //  Created by Jamie Cras on 09/03/2026.
 //
 
-import Combine
 import Foundation
 import SwiftUI
 
-// MARK: - Installation Status
-
-enum InstallStatus: String, Codable {
-    case notInstalled = "Not Installed"
-    case installed = "Installed"
-    case outdated = "Update Available"
-    case installing = "Installing…"
-    case uninstalling = "Uninstalling…"
-    case checking = "Checking…"
-
-    var color: Color {
-        switch self {
-        case .installed: .green
-        case .outdated: .orange
-        case .notInstalled: .secondary
-        case .installing, .uninstalling, .checking: .blue
-        }
-    }
-
-    var icon: String {
-        switch self {
-        case .installed: "checkmark.circle.fill"
-        case .outdated: "arrow.up.circle.fill"
-        case .notInstalled: "circle.dashed"
-        case .installing, .uninstalling: "arrow.down.circle"
-        case .checking: "questionmark.circle"
-        }
-    }
-
-    var isInProgress: Bool {
-        switch self {
-        case .installing, .uninstalling, .checking: true
-        default: false
-        }
-    }
-}
-
 // MARK: - App Entry
 
-/// A single app entry the user wants installed via Homebrew Cask.
+/// A single app or command-line tool the user can pick.
 struct AppEntry: Identifiable, Codable, Equatable {
+    /// An app (installed directly from its maker's download, using Homebrew's
+    /// catalog for the link) or a command-line tool (installed with Homebrew).
+    enum Kind: String, Codable {
+        case app
+        case commandLine
+    }
+
     var id: String { caskName }
-    let caskName: String    // e.g. "google-chrome"
+    let caskName: String    // Homebrew token, e.g. "google-chrome" or "jq"
     let displayName: String // e.g. "Google Chrome"
     var homepageURL: String? // e.g. "https://www.mozilla.org/firefox/"
     var desc: String?        // e.g. "Web browser"
+    var kind: Kind = .app
+
+    init(caskName: String, displayName: String, homepageURL: String? = nil,
+         desc: String? = nil, kind: Kind = .app) {
+        self.caskName = caskName
+        self.displayName = displayName
+        self.homepageURL = homepageURL
+        self.desc = desc
+        self.kind = kind
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        caskName = try c.decode(String.self, forKey: .caskName)
+        displayName = try c.decode(String.self, forKey: .displayName)
+        homepageURL = try c.decodeIfPresent(String.self, forKey: .homepageURL)
+        desc = try c.decodeIfPresent(String.self, forKey: .desc)
+        kind = try c.decodeIfPresent(Kind.self, forKey: .kind) ?? .app
+    }
 
     /// Validates that a cask name looks like a real Homebrew token (lowercase, hyphens, digits, @).
     static func isValidCaskName(_ name: String) -> Bool {
@@ -135,6 +123,12 @@ struct AppCategory: Identifiable {
 // MARK: - Suggestions Data
 
 enum Suggestions {
+    /// Apps whose makers only serve downloads to Homebrew itself (their servers
+    /// return 403/404 to anything else), so they're installed through Homebrew
+    /// like command-line tools. `scripts/update-catalog-snapshot.py --probe`
+    /// re-checks every curated app's download link.
+    static let homebrewOnly: Set<String> = ["blender", "warp"]
+
     static let profiles: [SetupProfile] = [
         SetupProfile(
             name: "Developer",
@@ -235,131 +229,4 @@ enum Suggestions {
             AppEntry(caskName: "handbrake-app", displayName: "HandBrake", homepageURL: "https://handbrake.fr", desc: "Video transcoder"),
         ]),
     ]
-}
-
-// MARK: - App Store
-
-/// Persists the user's app list to UserDefaults and tracks installation status.
-@MainActor
-class AppStore: ObservableObject {
-    private static let storageKey = "savedApps"
-
-    @Published var apps: [AppEntry] = []
-    @Published var statuses: [String: InstallStatus] = [:]  // keyed by caskName
-
-    init() {
-        load()
-    }
-
-    // MARK: - Status
-
-    func status(for caskName: String) -> InstallStatus {
-        statuses[caskName] ?? .notInstalled
-    }
-
-    func setStatus(_ status: InstallStatus, for caskName: String) {
-        statuses[caskName] = status
-    }
-
-    /// Checks which apps in the list are installed and which are outdated.
-    func refreshStatuses() async {
-        for app in apps {
-            statuses[app.caskName] = .checking
-        }
-
-        // Get installed casks
-        let installedCasks = await runBrewCommand("brew list --cask")
-        let installedSet = Set(
-            installedCasks
-                .components(separatedBy: .newlines)
-                .map { $0.trimmingCharacters(in: .whitespaces) }
-                .filter { !$0.isEmpty }
-        )
-
-        // Get outdated casks
-        let outdatedOutput = await runBrewCommand("brew outdated --cask --quiet")
-        let outdatedSet = Set(
-            outdatedOutput
-                .components(separatedBy: .newlines)
-                .map { $0.trimmingCharacters(in: .whitespaces) }
-                .filter { !$0.isEmpty }
-        )
-
-        for app in apps {
-            if outdatedSet.contains(app.caskName) {
-                statuses[app.caskName] = .outdated
-            } else if installedSet.contains(app.caskName) {
-                statuses[app.caskName] = .installed
-            } else {
-                statuses[app.caskName] = .notInstalled
-            }
-        }
-    }
-
-    private func runBrewCommand(_ command: String) async -> String {
-        let process = Process()
-        process.executableURL = URL(fileURLWithPath: "/bin/zsh")
-        process.arguments = ["-c", command]
-        process.environment = ShellRunner.brewEnvironment()
-
-        let pipe = Pipe()
-        process.standardOutput = pipe
-        process.standardError = Pipe()
-
-        do {
-            try process.run()
-            process.waitUntilExit()
-            let data = pipe.fileHandleForReading.readDataToEndOfFile()
-            return String(data: data, encoding: .utf8) ?? ""
-        } catch {
-            return ""
-        }
-    }
-
-    // MARK: - Mutating
-
-    func add(_ app: AppEntry) {
-        guard AppEntry.isValidCaskName(app.caskName) else { return }
-        guard !apps.contains(where: { $0.caskName == app.caskName }) else { return }
-        apps.append(app)
-        save()
-    }
-
-    func addAll(_ newApps: [AppEntry]) {
-        for app in newApps {
-            guard AppEntry.isValidCaskName(app.caskName) else { continue }
-            guard !apps.contains(where: { $0.caskName == app.caskName }) else { continue }
-            apps.append(app)
-        }
-        save()
-    }
-
-    func remove(_ app: AppEntry) {
-        apps.removeAll { $0.caskName == app.caskName }
-        statuses.removeValue(forKey: app.caskName)
-        save()
-    }
-
-    func removeAtOffsets(_ offsets: IndexSet) {
-        let removing = offsets.map { apps[$0].caskName }
-        apps.remove(atOffsets: offsets)
-        for name in removing {
-            statuses.removeValue(forKey: name)
-        }
-        save()
-    }
-
-    // MARK: - Persistence
-
-    private func save() {
-        guard let data = try? JSONEncoder().encode(apps) else { return }
-        UserDefaults.standard.set(data, forKey: Self.storageKey)
-    }
-
-    private func load() {
-        guard let data = UserDefaults.standard.data(forKey: Self.storageKey),
-              let decoded = try? JSONDecoder().decode([AppEntry].self, from: data)
-        else { return }
-        apps = decoded
-    }
 }

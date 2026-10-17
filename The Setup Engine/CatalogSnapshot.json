@@ -1,0 +1,2654 @@
+[
+ {
+  "artifacts": [
+   {
+    "app": [
+     "1Password.app"
+    ],
+    "target": "/Applications/1Password.app"
+   }
+  ],
+  "auto_updates": true,
+  "container": null,
+  "depends_on": {
+   "macos": {
+    ">=": [
+     "12"
+    ]
+   }
+  },
+  "deprecated": false,
+  "deprecation_reason": null,
+  "desc": "Password manager that keeps all passwords secure behind one password",
+  "disable_reason": null,
+  "disabled": false,
+  "homepage": "https://1password.com/",
+  "name": [
+   "1Password"
+  ],
+  "sha256": "7af18581d38e0cd2263b234186eaed4b1684e559e147dcceb4bf3fc77ee7a543",
+  "token": "1password",
+  "url": "https://downloads.1password.com/mac/1Password-8.12.40-aarch64.zip",
+  "url_specs": {},
+  "variations": {
+   "golden_gate": {
+    "sha256": "17ca8ad1e77af103e6cf2986d028f212e71f19195cb7c60bbbd314267827987f",
+    "url": "https://downloads.1password.com/mac/1Password-8.12.40-x86_64.zip"
+   },
+   "monterey": {
+    "sha256": "17ca8ad1e77af103e6cf2986d028f212e71f19195cb7c60bbbd314267827987f",
+    "url": "https://downloads.1password.com/mac/1Password-8.12.40-x86_64.zip"
+   },
+   "sequoia": {
+    "sha256": "17ca8ad1e77af103e6cf2986d028f212e71f19195cb7c60bbbd314267827987f",
+    "url": "https://downloads.1password.com/mac/1Password-8.12.40-x86_64.zip"
+   },
+   "sonoma": {
+    "sha256": "17ca8ad1e77af103e6cf2986d028f212e71f19195cb7c60bbbd314267827987f",
+    "url": "https://downloads.1password.com/mac/1Password-8.12.40-x86_64.zip"
+   },
+   "tahoe": {
+    "sha256": "17ca8ad1e77af103e6cf2986d028f212e71f19195cb7c60bbbd314267827987f",
+    "url": "https://downloads.1password.com/mac/1Password-8.12.40-x86_64.zip"
+   },
+   "ventura": {
+    "sha256": "17ca8ad1e77af103e6cf2986d028f212e71f19195cb7c60bbbd314267827987f",
+    "url": "https://downloads.1password.com/mac/1Password-8.12.40-x86_64.zip"
+   }
+  },
+  "version": "8.12.40"
+ },
+ {
+  "artifacts": [
+   {
+    "app": [
+     "AlDente.app"
+    ],
+    "target": "/Applications/AlDente.app"
+   }
+  ],
+  "auto_updates": true,
+  "container": null,
+  "depends_on": {
+   "macos": {
+    ">=": [
+     "12"
+    ]
+   }
+  },
+  "deprecated": false,
+  "deprecation_reason": null,
+  "desc": "Menu bar tool to limit maximum charging percentage",
+  "disable_reason": null,
+  "disabled": false,
+  "homepage": "https://apphousekitchen.com/",
+  "name": [
+   "AlDente"
+  ],
+  "sha256": "b2634ae47f5f860fa75f5be0a9ae89b136dbb514003800ed256873f437aa701b",
+  "token": "aldente",
+  "url": "https://apphousekitchen.com/aldente/AlDente1.39.4.dmg",
+  "url_specs": {},
+  "variations": {},
+  "version": "1.39.4"
+ },
+ {
+  "artifacts": [
+   {
+    "app": [
+     "Alfred 5.app"
+    ],
+    "target": "/Applications/Alfred 5.app"
+   }
+  ],
+  "auto_updates": true,
+  "container": null,
+  "depends_on": {
+   "macos": {}
+  },
+  "deprecated": false,
+  "deprecation_reason": null,
+  "desc": "Application launcher and productivity software",
+  "disable_reason": null,
+  "disabled": false,
+  "homepage": "https://www.alfredapp.com/",
+  "name": [
+   "Alfred"
+  ],
+  "sha256": "67a9233c711d9285775c7a8ef0ee9ea551f937f439b1f7b4e4c0996fd2d06426",
+  "token": "alfred",
+  "url": "https://cachefly.alfredapp.com/Alfred_5.8.1_2349.tar.gz",
+  "url_specs": {},
+  "variations": {},
+  "version": "5.8.1,2349"
+ },
+ {
+  "artifacts": [
+   {
+    "app": [
+     "AppCleaner.app"
+    ],
+    "target": "/Applications/AppCleaner.app"
+   }
+  ],
+  "auto_updates": true,
+  "container": null,
+  "depends_on": {
+   "macos": {
+    ">=": [
+     "15"
+    ]
+   }
+  },
+  "deprecated": false,
+  "deprecation_reason": null,
+  "desc": "Application uninstaller",
+  "disable_reason": null,
+  "disabled": false,
+  "homepage": "https://freemacsoft.net/appcleaner/",
+  "name": [
+   "FreeMacSoft AppCleaner"
+  ],
+  "sha256": "3d7fa6146fb57da955dca408587fc658ac14aeb86eda7907763ae66397c9e65e",
+  "token": "appcleaner",
+  "url": "https://www.freemacsoft.net/downloads/AppCleaner_3.7.zip",
+  "url_specs": {},
+  "variations": {},
+  "version": "3.7"
+ },
+ {
+  "artifacts": [
+   {
+    "app": [
+     "Arc.app"
+    ],
+    "target": "/Applications/Arc.app"
+   }
+  ],
+  "auto_updates": true,
+  "container": null,
+  "depends_on": {
+   "macos": {
+    ">=": [
+     "13"
+    ]
+   }
+  },
+  "deprecated": false,
+  "deprecation_reason": null,
+  "desc": "Chromium based browser",
+  "disable_reason": null,
+  "disabled": false,
+  "homepage": "https://arc.net/",
+  "name": [
+   "Arc"
+  ],
+  "sha256": "f8f2fb154f4a9f11c953cabf24ed3bc07d12251753cb36aa77356c95de965cf7",
+  "token": "arc",
+  "url": "https://releases.arc.net/release/Arc-1.169.0-88758.zip",
+  "url_specs": {},
+  "variations": {},
+  "version": "1.169.0,88758"
+ },
+ {
+  "artifacts": [
+   {
+    "app": [
+     "Blender.app"
+    ],
+    "target": "/Applications/Blender.app"
+   }
+  ],
+  "auto_updates": null,
+  "container": null,
+  "depends_on": {
+   "macos": {}
+  },
+  "deprecated": false,
+  "deprecation_reason": null,
+  "desc": "3D creation suite",
+  "disable_reason": null,
+  "disabled": false,
+  "homepage": "https://www.blender.org/",
+  "name": [
+   "Blender"
+  ],
+  "sha256": "dc4125399b8bfefe283cc1624d6cfc7809d1cac20ace51072127eb371f31f210",
+  "token": "blender",
+  "url": "https://download.blender.org/release/Blender5.2/blender-5.2.2-macos-arm64.dmg",
+  "url_specs": {},
+  "variations": {
+   "big_sur": {
+    "sha256": "613e73339e97bd113adeeb28d9155beeacf2df7119ee4dbd6bdce234843645f6",
+    "url": "https://download.blender.org/release/Blender4.5/blender-4.5.14-macos-x64.dmg",
+    "version": "4.5.14"
+   },
+   "golden_gate": {
+    "sha256": "613e73339e97bd113adeeb28d9155beeacf2df7119ee4dbd6bdce234843645f6",
+    "url": "https://download.blender.org/release/Blender4.5/blender-4.5.14-macos-x64.dmg",
+    "version": "4.5.14"
+   },
+   "monterey": {
+    "sha256": "613e73339e97bd113adeeb28d9155beeacf2df7119ee4dbd6bdce234843645f6",
+    "url": "https://download.blender.org/release/Blender4.5/blender-4.5.14-macos-x64.dmg",
+    "version": "4.5.14"
+   },
+   "sequoia": {
+    "sha256": "613e73339e97bd113adeeb28d9155beeacf2df7119ee4dbd6bdce234843645f6",
+    "url": "https://download.blender.org/release/Blender4.5/blender-4.5.14-macos-x64.dmg",
+    "version": "4.5.14"
+   },
+   "sonoma": {
+    "sha256": "613e73339e97bd113adeeb28d9155beeacf2df7119ee4dbd6bdce234843645f6",
+    "url": "https://download.blender.org/release/Blender4.5/blender-4.5.14-macos-x64.dmg",
+    "version": "4.5.14"
+   },
+   "tahoe": {
+    "sha256": "613e73339e97bd113adeeb28d9155beeacf2df7119ee4dbd6bdce234843645f6",
+    "url": "https://download.blender.org/release/Blender4.5/blender-4.5.14-macos-x64.dmg",
+    "version": "4.5.14"
+   },
+   "ventura": {
+    "sha256": "613e73339e97bd113adeeb28d9155beeacf2df7119ee4dbd6bdce234843645f6",
+    "url": "https://download.blender.org/release/Blender4.5/blender-4.5.14-macos-x64.dmg",
+    "version": "4.5.14"
+   }
+  },
+  "version": "5.2.2"
+ },
+ {
+  "artifacts": [
+   {
+    "app": [
+     "Brave Browser.app"
+    ],
+    "target": "/Applications/Brave Browser.app"
+   }
+  ],
+  "auto_updates": true,
+  "container": null,
+  "depends_on": {
+   "macos": {
+    ">=": [
+     "13"
+    ]
+   }
+  },
+  "deprecated": false,
+  "deprecation_reason": null,
+  "desc": "Web browser focusing on privacy",
+  "disable_reason": null,
+  "disabled": false,
+  "homepage": "https://brave.com/",
+  "name": [
+   "Brave"
+  ],
+  "sha256": "4129207d00e568c5dba080bb91cb3b92d5762600391a32b6debb8162518d6b06",
+  "token": "brave-browser",
+  "url": "https://updates-cdn.bravesoftware.com/sparkle/Brave-Browser/stable-arm64/197.59/Brave-Browser-arm64.dmg",
+  "url_specs": {},
+  "variations": {
+   "golden_gate": {
+    "sha256": "1508f2c829033fb22d708bdab3a378867491cb742aa531604821ef371706c6c2",
+    "url": "https://updates-cdn.bravesoftware.com/sparkle/Brave-Browser/stable/197.59/Brave-Browser-x64.dmg"
+   },
+   "sequoia": {
+    "sha256": "1508f2c829033fb22d708bdab3a378867491cb742aa531604821ef371706c6c2",
+    "url": "https://updates-cdn.bravesoftware.com/sparkle/Brave-Browser/stable/197.59/Brave-Browser-x64.dmg"
+   },
+   "sonoma": {
+    "sha256": "1508f2c829033fb22d708bdab3a378867491cb742aa531604821ef371706c6c2",
+    "url": "https://updates-cdn.bravesoftware.com/sparkle/Brave-Browser/stable/197.59/Brave-Browser-x64.dmg"
+   },
+   "tahoe": {
+    "sha256": "1508f2c829033fb22d708bdab3a378867491cb742aa531604821ef371706c6c2",
+    "url": "https://updates-cdn.bravesoftware.com/sparkle/Brave-Browser/stable/197.59/Brave-Browser-x64.dmg"
+   },
+   "ventura": {
+    "sha256": "1508f2c829033fb22d708bdab3a378867491cb742aa531604821ef371706c6c2",
+    "url": "https://updates-cdn.bravesoftware.com/sparkle/Brave-Browser/stable/197.59/Brave-Browser-x64.dmg"
+   }
+  },
+  "version": "1.97.59.0"
+ },
+ {
+  "artifacts": [
+   {
+    "app": [
+     "Discord.app"
+    ],
+    "target": "/Applications/Discord.app"
+   }
+  ],
+  "auto_updates": true,
+  "container": null,
+  "depends_on": {
+   "macos": {}
+  },
+  "deprecated": false,
+  "deprecation_reason": null,
+  "desc": "Voice and text chat software",
+  "disable_reason": null,
+  "disabled": false,
+  "homepage": "https://discord.com/",
+  "name": [
+   "Discord"
+  ],
+  "sha256": "9bcada2ac203337ec523930de5ace261c1839250bfd4e648999af93f5be9a646",
+  "token": "discord",
+  "url": "https://dl.discordapp.net/apps/osx/0.0.416/Discord.dmg",
+  "url_specs": {},
+  "variations": {
+   "arm64_big_sur": {
+    "sha256": "568293a1f65fab2244b5acdac282b88b6f00efd87defd76cc77185d1b9caba64",
+    "url": "https://dl.discordapp.net/apps/osx/0.0.402/Discord.dmg",
+    "version": "0.0.402"
+   },
+   "big_sur": {
+    "sha256": "568293a1f65fab2244b5acdac282b88b6f00efd87defd76cc77185d1b9caba64",
+    "url": "https://dl.discordapp.net/apps/osx/0.0.402/Discord.dmg",
+    "version": "0.0.402"
+   }
+  },
+  "version": "0.0.416"
+ },
+ {
+  "artifacts": [
+   {
+    "app": [
+     "Docker.app"
+    ],
+    "target": "/Applications/Docker.app"
+   }
+  ],
+  "auto_updates": true,
+  "container": null,
+  "depends_on": {
+   "macos": {
+    ">=": [
+     "14"
+    ]
+   }
+  },
+  "deprecated": false,
+  "deprecation_reason": null,
+  "desc": "App to build and share containerised applications and microservices",
+  "disable_reason": null,
+  "disabled": false,
+  "homepage": "https://www.docker.com/products/docker-desktop",
+  "name": [
+   "Docker Desktop",
+   "Docker Community Edition",
+   "Docker CE"
+  ],
+  "sha256": "7857222d3c009d787e7f8347b12e24bfee44e49a68cf455cb4b612991d2492c1",
+  "token": "docker-desktop",
+  "url": "https://desktop.docker.com/mac/main/arm64/242831/Docker.dmg",
+  "url_specs": {},
+  "variations": {
+   "golden_gate": {
+    "artifacts": [
+     {
+      "uninstall": [
+       {
+        "delete": [
+         "/Library/PrivilegedHelperTools/com.docker.socket",
+         "/Library/PrivilegedHelperTools/com.docker.vmnetd"
+        ],
+        "launchctl": [
+         "com.docker.helper",
+         "com.docker.socket",
+         "com.docker.vmnetd"
+        ],
+        "quit": [
+         "com.docker.docker",
+         "com.electron.dockerdesktop"
+        ],
+        "rmdir": "~/.docker/bin"
+       }
+      ]
+     },
+     {
+      "app": [
+       "Docker.app"
+      ],
+      "target": "/Applications/Docker.app"
+     },
+     {
+      "binary": [
+       "$APPDIR/Docker.app/Contents/Resources/bin/docker-credential-desktop",
+       {
+        "target": "/usr/local/bin/docker-credential-desktop"
+       }
+      ],
+      "target": "/usr/local/bin/docker-credential-desktop"
+     },
+     {
+      "binary": [
+       "$APPDIR/Docker.app/Contents/Resources/bin/docker-credential-ecr-login",
+       {
+        "target": "/usr/local/bin/docker-credential-ecr-login"
+       }
+      ],
+      "target": "/usr/local/bin/docker-credential-ecr-login"
+     },
+     {
+      "binary": [
+       "$APPDIR/Docker.app/Contents/Resources/bin/docker-credential-osxkeychain",
+       {
+        "target": "/usr/local/bin/docker-credential-osxkeychain"
+       }
+      ],
+      "target": "/usr/local/bin/docker-credential-osxkeychain"
+     },
+     {
+      "binary": [
+       "$APPDIR/Docker.app/Contents/Resources/bin/kubectl",
+       {
+        "target": "/usr/local/bin/kubectl.docker"
+       }
+      ],
+      "target": "/usr/local/bin/kubectl.docker"
+     },
+     {
+      "binary": [
+       "$APPDIR/Docker.app/Contents/Resources/cli-plugins/docker-compose",
+       {
+        "target": "/usr/local/cli-plugins/docker-compose"
+       }
+      ],
+      "target": "/usr/local/cli-plugins/docker-compose"
+     },
+     {
+      "binary": [
+       "$APPDIR/Docker.app/Contents/Resources/bin/com.docker.hyperkit",
+       {
+        "target": "/usr/local/bin/hyperkit"
+       }
+      ],
+      "target": "/usr/local/bin/hyperkit"
+     },
+     {
+      "binary": [
+       "$APPDIR/Docker.app/Contents/Resources/bin/docker",
+       {
+        "target": "/usr/local/bin/docker"
+       }
+      ],
+      "target": "/usr/local/bin/docker"
+     },
+     {
+      "bash_completion": [
+       "$APPDIR/Docker.app/Contents/Resources/etc/docker-compose.bash-completion"
+      ],
+      "target": "$HOMEBREW_PREFIX/etc/bash_completion.d/docker-compose"
+     },
+     {
+      "bash_completion": [
+       "$APPDIR/Docker.app/Contents/Resources/etc/docker.bash-completion"
+      ],
+      "target": "$HOMEBREW_PREFIX/etc/bash_completion.d/docker"
+     },
+     {
+      "target": "$HOMEBREW_PREFIX/share/zsh/site-functions/_docker-compose",
+      "zsh_completion": [
+       "$APPDIR/Docker.app/Contents/Resources/etc/docker-compose.zsh-completion"
+      ]
+     },
+     {
+      "target": "$HOMEBREW_PREFIX/share/zsh/site-functions/_docker",
+      "zsh_completion": [
+       "$APPDIR/Docker.app/Contents/Resources/etc/docker.zsh-completion"
+      ]
+     },
+     {
+      "fish_completion": [
+       "$APPDIR/Docker.app/Contents/Resources/etc/docker-compose.fish-completion"
+      ],
+      "target": "$HOMEBREW_PREFIX/share/fish/vendor_completions.d/docker-compose.fish"
+     },
+     {
+      "fish_completion": [
+       "$APPDIR/Docker.app/Contents/Resources/etc/docker.fish-completion"
+      ],
+      "target": "$HOMEBREW_PREFIX/share/fish/vendor_completions.d/docker.fish"
+     },
+     {
+      "postflight_steps": [
+       {
+        "steps": [
+         {
+          "force": true,
+          "guards": [
+           {
+            "condition": "unless_exists",
+            "id": "1",
+            "path": "/usr/local/bin/kubectl"
+           }
+          ],
+          "source": {
+           "path": "{{appdir}}/Docker.app/Contents/Resources/bin/kubectl"
+          },
+          "sudo": "if_needed",
+          "target": {
+           "path": "/usr/local/bin/kubectl"
+          },
+          "type": "symlink",
+          "uninstall": true
+         }
+        ]
+       }
+      ]
+     },
+     {
+      "zap": [
+       {
+        "rmdir": [
+         "~/Library/Caches/com.plausiblelabs.crashreporter.data",
+         "~/Library/Caches/KSCrashReports"
+        ],
+        "trash": [
+         "/usr/local/bin/docker-compose.backup",
+         "/usr/local/bin/docker.backup",
+         "~/.docker",
+         "~/Library/Application Scripts/com.docker.helper",
+         "~/Library/Application Scripts/group.com.docker",
+         "~/Library/Application Support/com.apple.sharedfilelist/com.apple.LSSharedFileList.ApplicationRecentDocuments/com.docker.helper.sfl*",
+         "~/Library/Application Support/com.apple.sharedfilelist/com.apple.LSSharedFileList.ApplicationRecentDocuments/com.electron.dockerdesktop.sfl*",
+         "~/Library/Application Support/com.bugsnag.Bugsnag/com.docker.docker",
+         "~/Library/Application Support/Docker Desktop",
+         "~/Library/Application Support/docker-secrets-engine",
+         "~/Library/Caches/com.docker.docker",
+         "~/Library/Caches/com.plausiblelabs.crashreporter.data/com.docker.docker",
+         "~/Library/Caches/Docker Desktop",
+         "~/Library/Caches/docker-secrets-engine",
+         "~/Library/Caches/KSCrashReports/Docker",
+         "~/Library/Containers/com.docker.docker",
+         "~/Library/Containers/com.docker.helper",
+         "~/Library/Group Containers/group.com.docker",
+         "~/Library/HTTPStorages/com.docker.docker",
+         "~/Library/HTTPStorages/com.docker.docker.binarycookies",
+         "~/Library/Logs/Docker Desktop",
+         "~/Library/Preferences/com.docker.docker.plist",
+         "~/Library/Preferences/com.electron.docker-frontend.plist",
+         "~/Library/Preferences/com.electron.dockerdesktop.plist",
+         "~/Library/Saved Application State/com.electron.docker-frontend.savedState",
+         "~/Library/Saved Application State/com.electron.dockerdesktop.savedState"
+        ]
+       }
+      ]
+     }
+    ],
+    "sha256": "0c7476aba43f6fa91156d2359d7b22c2804cf30446c1f71d64b1f74149990316",
+    "url": "https://desktop.docker.com/mac/main/amd64/242831/Docker.dmg"
+   },
+   "sequoia": {
+    "artifacts": [
+     {
+      "uninstall": [
+       {
+        "delete": [
+         "/Library/PrivilegedHelperTools/com.docker.socket",
+         "/Library/PrivilegedHelperTools/com.docker.vmnetd"
+        ],
+        "launchctl": [
+         "com.docker.helper",
+         "com.docker.socket",
+         "com.docker.vmnetd"
+        ],
+        "quit": [
+         "com.docker.docker",
+         "com.electron.dockerdesktop"
+        ],
+        "rmdir": "~/.docker/bin"
+       }
+      ]
+     },
+     {
+      "app": [
+       "Docker.app"
+      ],
+      "target": "/Applications/Docker.app"
+     },
+     {
+      "binary": [
+       "$APPDIR/Docker.app/Contents/Resources/bin/docker-credential-desktop",
+       {
+        "target": "/usr/local/bin/docker-credential-desktop"
+       }
+      ],
+      "target": "/usr/local/bin/docker-credential-desktop"
+     },
+     {
+      "binary": [
+       "$APPDIR/Docker.app/Contents/Resources/bin/docker-credential-ecr-login",
+       {
+        "target": "/usr/local/bin/docker-credential-ecr-login"
+       }
+      ],
+      "target": "/usr/local/bin/docker-credential-ecr-login"
+     },
+     {
+      "binary": [
+       "$APPDIR/Docker.app/Contents/Resources/bin/docker-credential-osxkeychain",
+       {
+        "target": "/usr/local/bin/docker-credential-osxkeychain"
+       }
+      ],
+      "target": "/usr/local/bin/docker-credential-osxkeychain"
+     },
+     {
+      "binary": [
+       "$APPDIR/Docker.app/Contents/Resources/bin/kubectl",
+       {
+        "target": "/usr/local/bin/kubectl.docker"
+       }
+      ],
+      "target": "/usr/local/bin/kubectl.docker"
+     },
+     {
+      "binary": [
+       "$APPDIR/Docker.app/Contents/Resources/cli-plugins/docker-compose",
+       {
+        "target": "/usr/local/cli-plugins/docker-compose"
+       }
+      ],
+      "target": "/usr/local/cli-plugins/docker-compose"
+     },
+     {
+      "binary": [
+       "$APPDIR/Docker.app/Contents/Resources/bin/com.docker.hyperkit",
+       {
+        "target": "/usr/local/bin/hyperkit"
+       }
+      ],
+      "target": "/usr/local/bin/hyperkit"
+     },
+     {
+      "binary": [
+       "$APPDIR/Docker.app/Contents/Resources/bin/docker",
+       {
+        "target": "/usr/local/bin/docker"
+       }
+      ],
+      "target": "/usr/local/bin/docker"
+     },
+     {
+      "bash_completion": [
+       "$APPDIR/Docker.app/Contents/Resources/etc/docker-compose.bash-completion"
+      ],
+      "target": "$HOMEBREW_PREFIX/etc/bash_completion.d/docker-compose"
+     },
+     {
+      "bash_completion": [
+       "$APPDIR/Docker.app/Contents/Resources/etc/docker.bash-completion"
+      ],
+      "target": "$HOMEBREW_PREFIX/etc/bash_completion.d/docker"
+     },
+     {
+      "target": "$HOMEBREW_PREFIX/share/zsh/site-functions/_docker-compose",
+      "zsh_completion": [
+       "$APPDIR/Docker.app/Contents/Resources/etc/docker-compose.zsh-completion"
+      ]
+     },
+     {
+      "target": "$HOMEBREW_PREFIX/share/zsh/site-functions/_docker",
+      "zsh_completion": [
+       "$APPDIR/Docker.app/Contents/Resources/etc/docker.zsh-completion"
+      ]
+     },
+     {
+      "fish_completion": [
+       "$APPDIR/Docker.app/Contents/Resources/etc/docker-compose.fish-completion"
+      ],
+      "target": "$HOMEBREW_PREFIX/share/fish/vendor_completions.d/docker-compose.fish"
+     },
+     {
+      "fish_completion": [
+       "$APPDIR/Docker.app/Contents/Resources/etc/docker.fish-completion"
+      ],
+      "target": "$HOMEBREW_PREFIX/share/fish/vendor_completions.d/docker.fish"
+     },
+     {
+      "postflight_steps": [
+       {
+        "steps": [
+         {
+          "force": true,
+          "guards": [
+           {
+            "condition": "unless_exists",
+            "id": "1",
+            "path": "/usr/local/bin/kubectl"
+           }
+          ],
+          "source": {
+           "path": "{{appdir}}/Docker.app/Contents/Resources/bin/kubectl"
+          },
+          "sudo": "if_needed",
+          "target": {
+           "path": "/usr/local/bin/kubectl"
+          },
+          "type": "symlink",
+          "uninstall": true
+         }
+        ]
+       }
+      ]
+     },
+     {
+      "zap": [
+       {
+        "rmdir": [
+         "~/Library/Caches/com.plausiblelabs.crashreporter.data",
+         "~/Library/Caches/KSCrashReports"
+        ],
+        "trash": [
+         "/usr/local/bin/docker-compose.backup",
+         "/usr/local/bin/docker.backup",
+         "~/.docker",
+         "~/Library/Application Scripts/com.docker.helper",
+         "~/Library/Application Scripts/group.com.docker",
+         "~/Library/Application Support/com.apple.sharedfilelist/com.apple.LSSharedFileList.ApplicationRecentDocuments/com.docker.helper.sfl*",
+         "~/Library/Application Support/com.apple.sharedfilelist/com.apple.LSSharedFileList.ApplicationRecentDocuments/com.electron.dockerdesktop.sfl*",
+         "~/Library/Application Support/com.bugsnag.Bugsnag/com.docker.docker",
+         "~/Library/Application Support/Docker Desktop",
+         "~/Library/Application Support/docker-secrets-engine",
+         "~/Library/Caches/com.docker.docker",
+         "~/Library/Caches/com.plausiblelabs.crashreporter.data/com.docker.docker",
+         "~/Library/Caches/Docker Desktop",
+         "~/Library/Caches/docker-secrets-engine",
+         "~/Library/Caches/KSCrashReports/Docker",
+         "~/Library/Containers/com.docker.docker",
+         "~/Library/Containers/com.docker.helper",
+         "~/Library/Group Containers/group.com.docker",
+         "~/Library/HTTPStorages/com.docker.docker",
+         "~/Library/HTTPStorages/com.docker.docker.binarycookies",
+         "~/Library/Logs/Docker Desktop",
+         "~/Library/Preferences/com.docker.docker.plist",
+         "~/Library/Preferences/com.electron.docker-frontend.plist",
+         "~/Library/Preferences/com.electron.dockerdesktop.plist",
+         "~/Library/Saved Application State/com.electron.docker-frontend.savedState",
+         "~/Library/Saved Application State/com.electron.dockerdesktop.savedState"
+        ]
+       }
+      ]
+     }
+    ],
+    "sha256": "0c7476aba43f6fa91156d2359d7b22c2804cf30446c1f71d64b1f74149990316",
+    "url": "https://desktop.docker.com/mac/main/amd64/242831/Docker.dmg"
+   },
+   "sonoma": {
+    "artifacts": [
+     {
+      "uninstall": [
+       {
+        "delete": [
+         "/Library/PrivilegedHelperTools/com.docker.socket",
+         "/Library/PrivilegedHelperTools/com.docker.vmnetd"
+        ],
+        "launchctl": [
+         "com.docker.helper",
+         "com.docker.socket",
+         "com.docker.vmnetd"
+        ],
+        "quit": [
+         "com.docker.docker",
+         "com.electron.dockerdesktop"
+        ],
+        "rmdir": "~/.docker/bin"
+       }
+      ]
+     },
+     {
+      "app": [
+       "Docker.app"
+      ],
+      "target": "/Applications/Docker.app"
+     },
+     {
+      "binary": [
+       "$APPDIR/Docker.app/Contents/Resources/bin/docker-credential-desktop",
+       {
+        "target": "/usr/local/bin/docker-credential-desktop"
+       }
+      ],
+      "target": "/usr/local/bin/docker-credential-desktop"
+     },
+     {
+      "binary": [
+       "$APPDIR/Docker.app/Contents/Resources/bin/docker-credential-ecr-login",
+       {
+        "target": "/usr/local/bin/docker-credential-ecr-login"
+       }
+      ],
+      "target": "/usr/local/bin/docker-credential-ecr-login"
+     },
+     {
+      "binary": [
+       "$APPDIR/Docker.app/Contents/Resources/bin/docker-credential-osxkeychain",
+       {
+        "target": "/usr/local/bin/docker-credential-osxkeychain"
+       }
+      ],
+      "target": "/usr/local/bin/docker-credential-osxkeychain"
+     },
+     {
+      "binary": [
+       "$APPDIR/Docker.app/Contents/Resources/bin/kubectl",
+       {
+        "target": "/usr/local/bin/kubectl.docker"
+       }
+      ],
+      "target": "/usr/local/bin/kubectl.docker"
+     },
+     {
+      "binary": [
+       "$APPDIR/Docker.app/Contents/Resources/cli-plugins/docker-compose",
+       {
+        "target": "/usr/local/cli-plugins/docker-compose"
+       }
+      ],
+      "target": "/usr/local/cli-plugins/docker-compose"
+     },
+     {
+      "binary": [
+       "$APPDIR/Docker.app/Contents/Resources/bin/com.docker.hyperkit",
+       {
+        "target": "/usr/local/bin/hyperkit"
+       }
+      ],
+      "target": "/usr/local/bin/hyperkit"
+     },
+     {
+      "binary": [
+       "$APPDIR/Docker.app/Contents/Resources/bin/docker",
+       {
+        "target": "/usr/local/bin/docker"
+       }
+      ],
+      "target": "/usr/local/bin/docker"
+     },
+     {
+      "bash_completion": [
+       "$APPDIR/Docker.app/Contents/Resources/etc/docker-compose.bash-completion"
+      ],
+      "target": "$HOMEBREW_PREFIX/etc/bash_completion.d/docker-compose"
+     },
+     {
+      "bash_completion": [
+       "$APPDIR/Docker.app/Contents/Resources/etc/docker.bash-completion"
+      ],
+      "target": "$HOMEBREW_PREFIX/etc/bash_completion.d/docker"
+     },
+     {
+      "target": "$HOMEBREW_PREFIX/share/zsh/site-functions/_docker-compose",
+      "zsh_completion": [
+       "$APPDIR/Docker.app/Contents/Resources/etc/docker-compose.zsh-completion"
+      ]
+     },
+     {
+      "target": "$HOMEBREW_PREFIX/share/zsh/site-functions/_docker",
+      "zsh_completion": [
+       "$APPDIR/Docker.app/Contents/Resources/etc/docker.zsh-completion"
+      ]
+     },
+     {
+      "fish_completion": [
+       "$APPDIR/Docker.app/Contents/Resources/etc/docker-compose.fish-completion"
+      ],
+      "target": "$HOMEBREW_PREFIX/share/fish/vendor_completions.d/docker-compose.fish"
+     },
+     {
+      "fish_completion": [
+       "$APPDIR/Docker.app/Contents/Resources/etc/docker.fish-completion"
+      ],
+      "target": "$HOMEBREW_PREFIX/share/fish/vendor_completions.d/docker.fish"
+     },
+     {
+      "postflight_steps": [
+       {
+        "steps": [
+         {
+          "force": true,
+          "guards": [
+           {
+            "condition": "unless_exists",
+            "id": "1",
+            "path": "/usr/local/bin/kubectl"
+           }
+          ],
+          "source": {
+           "path": "{{appdir}}/Docker.app/Contents/Resources/bin/kubectl"
+          },
+          "sudo": "if_needed",
+          "target": {
+           "path": "/usr/local/bin/kubectl"
+          },
+          "type": "symlink",
+          "uninstall": true
+         }
+        ]
+       }
+      ]
+     },
+     {
+      "zap": [
+       {
+        "rmdir": [
+         "~/Library/Caches/com.plausiblelabs.crashreporter.data",
+         "~/Library/Caches/KSCrashReports"
+        ],
+        "trash": [
+         "/usr/local/bin/docker-compose.backup",
+         "/usr/local/bin/docker.backup",
+         "~/.docker",
+         "~/Library/Application Scripts/com.docker.helper",
+         "~/Library/Application Scripts/group.com.docker",
+         "~/Library/Application Support/com.apple.sharedfilelist/com.apple.LSSharedFileList.ApplicationRecentDocuments/com.docker.helper.sfl*",
+         "~/Library/Application Support/com.apple.sharedfilelist/com.apple.LSSharedFileList.ApplicationRecentDocuments/com.electron.dockerdesktop.sfl*",
+         "~/Library/Application Support/com.bugsnag.Bugsnag/com.docker.docker",
+         "~/Library/Application Support/Docker Desktop",
+         "~/Library/Application Support/docker-secrets-engine",
+         "~/Library/Caches/com.docker.docker",
+         "~/Library/Caches/com.plausiblelabs.crashreporter.data/com.docker.docker",
+         "~/Library/Caches/Docker Desktop",
+         "~/Library/Caches/docker-secrets-engine",
+         "~/Library/Caches/KSCrashReports/Docker",
+         "~/Library/Containers/com.docker.docker",
+         "~/Library/Containers/com.docker.helper",
+         "~/Library/Group Containers/group.com.docker",
+         "~/Library/HTTPStorages/com.docker.docker",
+         "~/Library/HTTPStorages/com.docker.docker.binarycookies",
+         "~/Library/Logs/Docker Desktop",
+         "~/Library/Preferences/com.docker.docker.plist",
+         "~/Library/Preferences/com.electron.docker-frontend.plist",
+         "~/Library/Preferences/com.electron.dockerdesktop.plist",
+         "~/Library/Saved Application State/com.electron.docker-frontend.savedState",
+         "~/Library/Saved Application State/com.electron.dockerdesktop.savedState"
+        ]
+       }
+      ]
+     }
+    ],
+    "sha256": "0c7476aba43f6fa91156d2359d7b22c2804cf30446c1f71d64b1f74149990316",
+    "url": "https://desktop.docker.com/mac/main/amd64/242831/Docker.dmg"
+   },
+   "tahoe": {
+    "artifacts": [
+     {
+      "uninstall": [
+       {
+        "delete": [
+         "/Library/PrivilegedHelperTools/com.docker.socket",
+         "/Library/PrivilegedHelperTools/com.docker.vmnetd"
+        ],
+        "launchctl": [
+         "com.docker.helper",
+         "com.docker.socket",
+         "com.docker.vmnetd"
+        ],
+        "quit": [
+         "com.docker.docker",
+         "com.electron.dockerdesktop"
+        ],
+        "rmdir": "~/.docker/bin"
+       }
+      ]
+     },
+     {
+      "app": [
+       "Docker.app"
+      ],
+      "target": "/Applications/Docker.app"
+     },
+     {
+      "binary": [
+       "$APPDIR/Docker.app/Contents/Resources/bin/docker-credential-desktop",
+       {
+        "target": "/usr/local/bin/docker-credential-desktop"
+       }
+      ],
+      "target": "/usr/local/bin/docker-credential-desktop"
+     },
+     {
+      "binary": [
+       "$APPDIR/Docker.app/Contents/Resources/bin/docker-credential-ecr-login",
+       {
+        "target": "/usr/local/bin/docker-credential-ecr-login"
+       }
+      ],
+      "target": "/usr/local/bin/docker-credential-ecr-login"
+     },
+     {
+      "binary": [
+       "$APPDIR/Docker.app/Contents/Resources/bin/docker-credential-osxkeychain",
+       {
+        "target": "/usr/local/bin/docker-credential-osxkeychain"
+       }
+      ],
+      "target": "/usr/local/bin/docker-credential-osxkeychain"
+     },
+     {
+      "binary": [
+       "$APPDIR/Docker.app/Contents/Resources/bin/kubectl",
+       {
+        "target": "/usr/local/bin/kubectl.docker"
+       }
+      ],
+      "target": "/usr/local/bin/kubectl.docker"
+     },
+     {
+      "binary": [
+       "$APPDIR/Docker.app/Contents/Resources/cli-plugins/docker-compose",
+       {
+        "target": "/usr/local/cli-plugins/docker-compose"
+       }
+      ],
+      "target": "/usr/local/cli-plugins/docker-compose"
+     },
+     {
+      "binary": [
+       "$APPDIR/Docker.app/Contents/Resources/bin/com.docker.hyperkit",
+       {
+        "target": "/usr/local/bin/hyperkit"
+       }
+      ],
+      "target": "/usr/local/bin/hyperkit"
+     },
+     {
+      "binary": [
+       "$APPDIR/Docker.app/Contents/Resources/bin/docker",
+       {
+        "target": "/usr/local/bin/docker"
+       }
+      ],
+      "target": "/usr/local/bin/docker"
+     },
+     {
+      "bash_completion": [
+       "$APPDIR/Docker.app/Contents/Resources/etc/docker-compose.bash-completion"
+      ],
+      "target": "$HOMEBREW_PREFIX/etc/bash_completion.d/docker-compose"
+     },
+     {
+      "bash_completion": [
+       "$APPDIR/Docker.app/Contents/Resources/etc/docker.bash-completion"
+      ],
+      "target": "$HOMEBREW_PREFIX/etc/bash_completion.d/docker"
+     },
+     {
+      "target": "$HOMEBREW_PREFIX/share/zsh/site-functions/_docker-compose",
+      "zsh_completion": [
+       "$APPDIR/Docker.app/Contents/Resources/etc/docker-compose.zsh-completion"
+      ]
+     },
+     {
+      "target": "$HOMEBREW_PREFIX/share/zsh/site-functions/_docker",
+      "zsh_completion": [
+       "$APPDIR/Docker.app/Contents/Resources/etc/docker.zsh-completion"
+      ]
+     },
+     {
+      "fish_completion": [
+       "$APPDIR/Docker.app/Contents/Resources/etc/docker-compose.fish-completion"
+      ],
+      "target": "$HOMEBREW_PREFIX/share/fish/vendor_completions.d/docker-compose.fish"
+     },
+     {
+      "fish_completion": [
+       "$APPDIR/Docker.app/Contents/Resources/etc/docker.fish-completion"
+      ],
+      "target": "$HOMEBREW_PREFIX/share/fish/vendor_completions.d/docker.fish"
+     },
+     {
+      "postflight_steps": [
+       {
+        "steps": [
+         {
+          "force": true,
+          "guards": [
+           {
+            "condition": "unless_exists",
+            "id": "1",
+            "path": "/usr/local/bin/kubectl"
+           }
+          ],
+          "source": {
+           "path": "{{appdir}}/Docker.app/Contents/Resources/bin/kubectl"
+          },
+          "sudo": "if_needed",
+          "target": {
+           "path": "/usr/local/bin/kubectl"
+          },
+          "type": "symlink",
+          "uninstall": true
+         }
+        ]
+       }
+      ]
+     },
+     {
+      "zap": [
+       {
+        "rmdir": [
+         "~/Library/Caches/com.plausiblelabs.crashreporter.data",
+         "~/Library/Caches/KSCrashReports"
+        ],
+        "trash": [
+         "/usr/local/bin/docker-compose.backup",
+         "/usr/local/bin/docker.backup",
+         "~/.docker",
+         "~/Library/Application Scripts/com.docker.helper",
+         "~/Library/Application Scripts/group.com.docker",
+         "~/Library/Application Support/com.apple.sharedfilelist/com.apple.LSSharedFileList.ApplicationRecentDocuments/com.docker.helper.sfl*",
+         "~/Library/Application Support/com.apple.sharedfilelist/com.apple.LSSharedFileList.ApplicationRecentDocuments/com.electron.dockerdesktop.sfl*",
+         "~/Library/Application Support/com.bugsnag.Bugsnag/com.docker.docker",
+         "~/Library/Application Support/Docker Desktop",
+         "~/Library/Application Support/docker-secrets-engine",
+         "~/Library/Caches/com.docker.docker",
+         "~/Library/Caches/com.plausiblelabs.crashreporter.data/com.docker.docker",
+         "~/Library/Caches/Docker Desktop",
+         "~/Library/Caches/docker-secrets-engine",
+         "~/Library/Caches/KSCrashReports/Docker",
+         "~/Library/Containers/com.docker.docker",
+         "~/Library/Containers/com.docker.helper",
+         "~/Library/Group Containers/group.com.docker",
+         "~/Library/HTTPStorages/com.docker.docker",
+         "~/Library/HTTPStorages/com.docker.docker.binarycookies",
+         "~/Library/Logs/Docker Desktop",
+         "~/Library/Preferences/com.docker.docker.plist",
+         "~/Library/Preferences/com.electron.docker-frontend.plist",
+         "~/Library/Preferences/com.electron.dockerdesktop.plist",
+         "~/Library/Saved Application State/com.electron.docker-frontend.savedState",
+         "~/Library/Saved Application State/com.electron.dockerdesktop.savedState"
+        ]
+       }
+      ]
+     }
+    ],
+    "sha256": "0c7476aba43f6fa91156d2359d7b22c2804cf30446c1f71d64b1f74149990316",
+    "url": "https://desktop.docker.com/mac/main/amd64/242831/Docker.dmg"
+   }
+  },
+  "version": "4.95.0,242831"
+ },
+ {
+  "artifacts": [
+   {
+    "app": [
+     "Figma.app"
+    ],
+    "target": "/Applications/Figma.app"
+   }
+  ],
+  "auto_updates": true,
+  "container": null,
+  "depends_on": {
+   "macos": {}
+  },
+  "deprecated": false,
+  "deprecation_reason": null,
+  "desc": "Collaborative team software",
+  "disable_reason": null,
+  "disabled": false,
+  "homepage": "https://www.figma.com/",
+  "name": [
+   "Figma"
+  ],
+  "sha256": "8772e2f4188e823a9e8f92e34bcaf8d9489fae119be7beb22fdb8b8947b2d7f7",
+  "token": "figma",
+  "url": "https://desktop.figma.com/mac-arm/Figma-126.9.13.zip",
+  "url_specs": {},
+  "variations": {
+   "big_sur": {
+    "sha256": "8ef8586d4f3b76f34a3ba44dd464b971bafe2a85973387df2a9f46c5b7c453ca",
+    "url": "https://desktop.figma.com/mac/Figma-126.9.13.zip"
+   },
+   "golden_gate": {
+    "sha256": "8ef8586d4f3b76f34a3ba44dd464b971bafe2a85973387df2a9f46c5b7c453ca",
+    "url": "https://desktop.figma.com/mac/Figma-126.9.13.zip"
+   },
+   "monterey": {
+    "sha256": "8ef8586d4f3b76f34a3ba44dd464b971bafe2a85973387df2a9f46c5b7c453ca",
+    "url": "https://desktop.figma.com/mac/Figma-126.9.13.zip"
+   },
+   "sequoia": {
+    "sha256": "8ef8586d4f3b76f34a3ba44dd464b971bafe2a85973387df2a9f46c5b7c453ca",
+    "url": "https://desktop.figma.com/mac/Figma-126.9.13.zip"
+   },
+   "sonoma": {
+    "sha256": "8ef8586d4f3b76f34a3ba44dd464b971bafe2a85973387df2a9f46c5b7c453ca",
+    "url": "https://desktop.figma.com/mac/Figma-126.9.13.zip"
+   },
+   "tahoe": {
+    "sha256": "8ef8586d4f3b76f34a3ba44dd464b971bafe2a85973387df2a9f46c5b7c453ca",
+    "url": "https://desktop.figma.com/mac/Figma-126.9.13.zip"
+   },
+   "ventura": {
+    "sha256": "8ef8586d4f3b76f34a3ba44dd464b971bafe2a85973387df2a9f46c5b7c453ca",
+    "url": "https://desktop.figma.com/mac/Figma-126.9.13.zip"
+   }
+  },
+  "version": "126.9.13"
+ },
+ {
+  "artifacts": [
+   {
+    "app": [
+     "Firefox.app"
+    ],
+    "target": "/Applications/Firefox.app"
+   }
+  ],
+  "auto_updates": true,
+  "container": null,
+  "depends_on": {
+   "macos": {}
+  },
+  "deprecated": false,
+  "deprecation_reason": null,
+  "desc": "Web browser",
+  "disable_reason": null,
+  "disabled": false,
+  "homepage": "https://www.mozilla.org/firefox/",
+  "name": [
+   "Mozilla Firefox"
+  ],
+  "sha256": "dfe8508ee8880cec1578253eb02b9154b5971a55e832d97396f463cd07b5ef67",
+  "token": "firefox",
+  "url": "https://download-installer.cdn.mozilla.net/pub/firefox/releases/158.0/mac/en-US/Firefox%20158.0.dmg",
+  "url_specs": {},
+  "variations": {},
+  "version": "158.0"
+ },
+ {
+  "artifacts": [
+   {
+    "app": [
+     "GIMP.app"
+    ],
+    "target": "/Applications/GIMP.app"
+   }
+  ],
+  "auto_updates": null,
+  "container": null,
+  "depends_on": {},
+  "deprecated": false,
+  "deprecation_reason": null,
+  "desc": "Free and open-source image editor",
+  "disable_reason": null,
+  "disabled": false,
+  "homepage": "https://www.gimp.org/",
+  "name": [
+   "GIMP",
+   "GNU Image Manipulation Program"
+  ],
+  "sha256": "854573aec2be6a185aa021109c3c0ca94f210379204b704231bdd191b4060294",
+  "token": "gimp",
+  "url": "https://download.gimp.org/gimp/v3.2/macos/gimp-3.2.6-arm64.dmg",
+  "url_specs": {},
+  "variations": {
+   "big_sur": {
+    "sha256": "ebe633642445d4d6fc6b68e7be7ca581c0b28c18dc9de7747849528c982e5677",
+    "url": "https://download.gimp.org/gimp/v3.2/macos/gimp-3.2.6-x86_64.dmg"
+   },
+   "golden_gate": {
+    "sha256": "ebe633642445d4d6fc6b68e7be7ca581c0b28c18dc9de7747849528c982e5677",
+    "url": "https://download.gimp.org/gimp/v3.2/macos/gimp-3.2.6-x86_64.dmg"
+   },
+   "monterey": {
+    "sha256": "ebe633642445d4d6fc6b68e7be7ca581c0b28c18dc9de7747849528c982e5677",
+    "url": "https://download.gimp.org/gimp/v3.2/macos/gimp-3.2.6-x86_64.dmg"
+   },
+   "sequoia": {
+    "sha256": "ebe633642445d4d6fc6b68e7be7ca581c0b28c18dc9de7747849528c982e5677",
+    "url": "https://download.gimp.org/gimp/v3.2/macos/gimp-3.2.6-x86_64.dmg"
+   },
+   "sonoma": {
+    "sha256": "ebe633642445d4d6fc6b68e7be7ca581c0b28c18dc9de7747849528c982e5677",
+    "url": "https://download.gimp.org/gimp/v3.2/macos/gimp-3.2.6-x86_64.dmg"
+   },
+   "tahoe": {
+    "sha256": "ebe633642445d4d6fc6b68e7be7ca581c0b28c18dc9de7747849528c982e5677",
+    "url": "https://download.gimp.org/gimp/v3.2/macos/gimp-3.2.6-x86_64.dmg"
+   },
+   "ventura": {
+    "sha256": "ebe633642445d4d6fc6b68e7be7ca581c0b28c18dc9de7747849528c982e5677",
+    "url": "https://download.gimp.org/gimp/v3.2/macos/gimp-3.2.6-x86_64.dmg"
+   }
+  },
+  "version": "3.2.6"
+ },
+ {
+  "artifacts": [
+   {
+    "app": [
+     "GitHub Desktop.app"
+    ],
+    "target": "/Applications/GitHub Desktop.app"
+   }
+  ],
+  "auto_updates": true,
+  "container": null,
+  "depends_on": {
+   "macos": {
+    ">=": [
+     "12"
+    ]
+   }
+  },
+  "deprecated": false,
+  "deprecation_reason": null,
+  "desc": "Desktop client for GitHub repositories",
+  "disable_reason": null,
+  "disabled": false,
+  "homepage": "https://desktop.github.com/",
+  "name": [
+   "GitHub Desktop"
+  ],
+  "sha256": "5570d21a2f1955f42f69eab69046bf036de10cbef2bbb35719c263df33fea513",
+  "token": "github",
+  "url": "https://desktop.githubusercontent.com/releases/3.6.7-dbc92f97/GitHubDesktop-arm64.zip",
+  "url_specs": {},
+  "variations": {
+   "golden_gate": {
+    "sha256": "5ee4ad23e187348ba0bca1efcd3a67f9e3d08a2c0817d452234f500b351ce56e",
+    "url": "https://desktop.githubusercontent.com/releases/3.6.7-dbc92f97/GitHubDesktop-x64.zip"
+   },
+   "monterey": {
+    "sha256": "5ee4ad23e187348ba0bca1efcd3a67f9e3d08a2c0817d452234f500b351ce56e",
+    "url": "https://desktop.githubusercontent.com/releases/3.6.7-dbc92f97/GitHubDesktop-x64.zip"
+   },
+   "sequoia": {
+    "sha256": "5ee4ad23e187348ba0bca1efcd3a67f9e3d08a2c0817d452234f500b351ce56e",
+    "url": "https://desktop.githubusercontent.com/releases/3.6.7-dbc92f97/GitHubDesktop-x64.zip"
+   },
+   "sonoma": {
+    "sha256": "5ee4ad23e187348ba0bca1efcd3a67f9e3d08a2c0817d452234f500b351ce56e",
+    "url": "https://desktop.githubusercontent.com/releases/3.6.7-dbc92f97/GitHubDesktop-x64.zip"
+   },
+   "tahoe": {
+    "sha256": "5ee4ad23e187348ba0bca1efcd3a67f9e3d08a2c0817d452234f500b351ce56e",
+    "url": "https://desktop.githubusercontent.com/releases/3.6.7-dbc92f97/GitHubDesktop-x64.zip"
+   },
+   "ventura": {
+    "sha256": "5ee4ad23e187348ba0bca1efcd3a67f9e3d08a2c0817d452234f500b351ce56e",
+    "url": "https://desktop.githubusercontent.com/releases/3.6.7-dbc92f97/GitHubDesktop-x64.zip"
+   }
+  },
+  "version": "3.6.7-dbc92f97"
+ },
+ {
+  "artifacts": [
+   {
+    "app": [
+     "Google Chrome.app"
+    ],
+    "target": "/Applications/Google Chrome.app"
+   }
+  ],
+  "auto_updates": true,
+  "container": null,
+  "depends_on": {
+   "macos": {
+    ">=": [
+     "13"
+    ]
+   }
+  },
+  "deprecated": false,
+  "deprecation_reason": null,
+  "desc": "Web browser",
+  "disable_reason": null,
+  "disabled": false,
+  "homepage": "https://www.google.com/chrome/",
+  "name": [
+   "Google Chrome"
+  ],
+  "sha256": "no_check",
+  "token": "google-chrome",
+  "url": "https://dl.google.com/chrome/mac/universal/stable/GGRO/googlechrome.dmg",
+  "url_specs": {},
+  "variations": {},
+  "version": "155.0.8059.85"
+ },
+ {
+  "artifacts": [
+   {
+    "app": [
+     "HandBrake.app"
+    ],
+    "target": "/Applications/HandBrake.app"
+   }
+  ],
+  "auto_updates": true,
+  "container": null,
+  "depends_on": {
+   "macos": {}
+  },
+  "deprecated": false,
+  "deprecation_reason": null,
+  "desc": "Open-source video transcoder",
+  "disable_reason": null,
+  "disabled": false,
+  "homepage": "https://handbrake.fr/",
+  "name": [
+   "HandBrake"
+  ],
+  "sha256": "4afe27aaa77a7bbb0dcda1a335d96a5f53649f2649fb84de6982ffecc35de9d7",
+  "token": "handbrake-app",
+  "url": "https://handbrake.fr/rotation.php?file=HandBrake-1.11.2.dmg&update=true",
+  "url_specs": {},
+  "variations": {},
+  "version": "1.11.2"
+ },
+ {
+  "artifacts": [
+   {
+    "app": [
+     "IINA.app"
+    ],
+    "target": "/Applications/IINA.app"
+   }
+  ],
+  "auto_updates": true,
+  "container": null,
+  "depends_on": {
+   "macos": {
+    ">=": [
+     "12"
+    ]
+   }
+  },
+  "deprecated": false,
+  "deprecation_reason": null,
+  "desc": "Free and open-source media player",
+  "disable_reason": null,
+  "disabled": false,
+  "homepage": "https://iina.io/",
+  "name": [
+   "IINA"
+  ],
+  "sha256": "8fad50479b10e09645053457cec46bd53d054ced2242cfe68f74586735a20dc7",
+  "token": "iina",
+  "url": "https://dl.iina.io/IINA.v1.5.0.dmg",
+  "url_specs": {},
+  "variations": {
+   "big_sur": {
+    "depends_on": {
+     "macos": {}
+    }
+   },
+   "golden_gate": {
+    "depends_on": {
+     "macos": {}
+    }
+   },
+   "monterey": {
+    "depends_on": {
+     "macos": {}
+    }
+   },
+   "sequoia": {
+    "depends_on": {
+     "macos": {}
+    }
+   },
+   "sonoma": {
+    "depends_on": {
+     "macos": {}
+    }
+   },
+   "tahoe": {
+    "depends_on": {
+     "macos": {}
+    }
+   },
+   "ventura": {
+    "depends_on": {
+     "macos": {}
+    }
+   }
+  },
+  "version": "1.5.0"
+ },
+ {
+  "artifacts": [
+   {
+    "app": [
+     "ImageOptim.app"
+    ],
+    "target": "/Applications/ImageOptim.app"
+   }
+  ],
+  "auto_updates": true,
+  "container": null,
+  "depends_on": {
+   "macos": {}
+  },
+  "deprecated": false,
+  "deprecation_reason": null,
+  "desc": "Tool to optimise images to a smaller size",
+  "disable_reason": null,
+  "disabled": false,
+  "homepage": "https://imageoptim.com/mac",
+  "name": [
+   "ImageOptim"
+  ],
+  "sha256": "d4e453bbb55b6491d519a30e0e6de5beb7ce1a929e8f835767b638ef6ffd371d",
+  "token": "imageoptim",
+  "url": "https://imageoptim.com/ImageOptim1.9.3.tar.xz",
+  "url_specs": {},
+  "variations": {},
+  "version": "1.9.3"
+ },
+ {
+  "artifacts": [
+   {
+    "app": [
+     "iTerm.app"
+    ],
+    "target": "/Applications/iTerm.app"
+   }
+  ],
+  "auto_updates": true,
+  "container": null,
+  "depends_on": {
+   "macos": {
+    ">=": [
+     "13"
+    ]
+   }
+  },
+  "deprecated": false,
+  "deprecation_reason": null,
+  "desc": "Terminal emulator as alternative to Apple's Terminal app",
+  "disable_reason": null,
+  "disabled": false,
+  "homepage": "https://iterm2.com/",
+  "name": [
+   "iTerm2"
+  ],
+  "sha256": "bb6102e9f57bbe41979ba7c7b1c25d4112e9a5c2142606eeccbe18dc7ee0706f",
+  "token": "iterm2",
+  "url": "https://iterm2.com/downloads/stable/iTerm2-3_7_6.zip",
+  "url_specs": {},
+  "variations": {},
+  "version": "3.7.6"
+ },
+ {
+  "artifacts": [
+   {
+    "app": [
+     "Microsoft Edge.app"
+    ],
+    "target": "/Applications/Microsoft Edge.app"
+   }
+  ],
+  "auto_updates": true,
+  "container": null,
+  "depends_on": {
+   "macos": {
+    ">=": [
+     "13"
+    ]
+   }
+  },
+  "deprecated": false,
+  "deprecation_reason": null,
+  "desc": "Multi-platform web browser",
+  "disable_reason": null,
+  "disabled": false,
+  "homepage": "https://www.microsoft.com/en-us/edge?form=",
+  "name": [
+   "Microsoft Edge"
+  ],
+  "sha256": "292b57f514917be89575d1e8a1126dec28757cb0c42467831687f2548be78b17",
+  "token": "microsoft-edge",
+  "url": "https://msedge.sf.dl.delivery.mp.microsoft.com/filestreamingservice/files/709306ae-6f10-4efb-8abb-f6899182f264/MicrosoftEdge-155.0.4283.62.dmg",
+  "url_specs": {},
+  "variations": {},
+  "version": "155.0.4283.62,709306ae-6f10-4efb-8abb-f6899182f264"
+ },
+ {
+  "artifacts": [
+   {
+    "pkg": [
+     "MicrosoftTeams.pkg",
+     {
+      "choices": [
+       {
+        "attributeSetting": 0,
+        "choiceAttribute": "selected",
+        "choiceIdentifier": "com.microsoft.autoupdate"
+       }
+      ]
+     }
+    ]
+   }
+  ],
+  "auto_updates": true,
+  "container": null,
+  "depends_on": {
+   "macos": {
+    ">=": [
+     "14"
+    ]
+   }
+  },
+  "deprecated": false,
+  "deprecation_reason": null,
+  "desc": "Meet, chat, call, and collaborate in just one place",
+  "disable_reason": null,
+  "disabled": false,
+  "homepage": "https://www.microsoft.com/en/microsoft-teams/group-chat-software/",
+  "name": [
+   "Microsoft Teams"
+  ],
+  "sha256": "bda3a6a8c1085191126058311761069c4274d9a0fbb663038ee25b211ae1046d",
+  "token": "microsoft-teams",
+  "url": "https://statics.teams.cdn.office.net/production-osx/26261.303.5165.1465/MicrosoftTeams.pkg",
+  "url_specs": {},
+  "variations": {},
+  "version": "26261.303.5165.1465"
+ },
+ {
+  "artifacts": [
+   {
+    "app": [
+     "MonitorControl.app"
+    ],
+    "target": "/Applications/MonitorControl.app"
+   }
+  ],
+  "auto_updates": true,
+  "container": null,
+  "depends_on": {
+   "macos": {}
+  },
+  "deprecated": false,
+  "deprecation_reason": null,
+  "desc": "Tool to control external monitor brightness & volume",
+  "disable_reason": null,
+  "disabled": false,
+  "homepage": "https://github.com/MonitorControl/MonitorControl",
+  "name": [
+   "MonitorControl"
+  ],
+  "sha256": "e058da598b92f6ca674f4398c0b6fa49b3b5567ccfddccf6c6a5b23c5c625612",
+  "token": "monitorcontrol",
+  "url": "https://github.com/MonitorControl/MonitorControl/releases/download/v4.4.0/MonitorControl.4.4.0.dmg",
+  "url_specs": {},
+  "variations": {},
+  "version": "4.4.0"
+ },
+ {
+  "artifacts": [
+   {
+    "app": [
+     "Notion.app"
+    ],
+    "target": "/Applications/Notion.app"
+   }
+  ],
+  "auto_updates": true,
+  "container": null,
+  "depends_on": {
+   "macos": {
+    ">=": [
+     "13"
+    ]
+   }
+  },
+  "deprecated": false,
+  "deprecation_reason": null,
+  "desc": "App to write, plan, collaborate, and get organised",
+  "disable_reason": null,
+  "disabled": false,
+  "homepage": "https://www.notion.com/",
+  "name": [
+   "Notion"
+  ],
+  "sha256": "0e22c2f5d950f5430834bb0eb4e1ad9a90ddea85433d2d9428e6a9fb2809f9e8",
+  "token": "notion",
+  "url": "https://desktop-release.notion-static.com/Notion-7.39.0-arm64.dmg",
+  "url_specs": {},
+  "variations": {
+   "golden_gate": {
+    "sha256": "c966f1c9696f258570b17fa3dc30f660ded94d24b285778eb020f99c4237bab5",
+    "url": "https://desktop-release.notion-static.com/Notion-7.39.0.dmg"
+   },
+   "sequoia": {
+    "sha256": "c966f1c9696f258570b17fa3dc30f660ded94d24b285778eb020f99c4237bab5",
+    "url": "https://desktop-release.notion-static.com/Notion-7.39.0.dmg"
+   },
+   "sonoma": {
+    "sha256": "c966f1c9696f258570b17fa3dc30f660ded94d24b285778eb020f99c4237bab5",
+    "url": "https://desktop-release.notion-static.com/Notion-7.39.0.dmg"
+   },
+   "tahoe": {
+    "sha256": "c966f1c9696f258570b17fa3dc30f660ded94d24b285778eb020f99c4237bab5",
+    "url": "https://desktop-release.notion-static.com/Notion-7.39.0.dmg"
+   },
+   "ventura": {
+    "sha256": "c966f1c9696f258570b17fa3dc30f660ded94d24b285778eb020f99c4237bab5",
+    "url": "https://desktop-release.notion-static.com/Notion-7.39.0.dmg"
+   }
+  },
+  "version": "7.39.0"
+ },
+ {
+  "artifacts": [
+   {
+    "app": [
+     "OBS.app"
+    ],
+    "target": "/Applications/OBS.app"
+   }
+  ],
+  "auto_updates": true,
+  "container": null,
+  "depends_on": {
+   "macos": {
+    ">=": [
+     "13"
+    ]
+   }
+  },
+  "deprecated": false,
+  "deprecation_reason": null,
+  "desc": "Open-source software for live streaming and screen recording",
+  "disable_reason": null,
+  "disabled": false,
+  "homepage": "https://obsproject.com/",
+  "name": [
+   "OBS"
+  ],
+  "sha256": "920d6f26703d2df6e4085bd3c1cbed30488325084136c7a6e9e37021fbd6aaf7",
+  "token": "obs",
+  "url": "https://cdn-fastly.obsproject.com/downloads/obs-studio-32.2.2-macos-apple.dmg",
+  "url_specs": {},
+  "variations": {
+   "golden_gate": {
+    "sha256": "f8d8afe3dffdc86efa0698c02ff0c997866bac3e6208ddaf56d37108baacf197",
+    "url": "https://cdn-fastly.obsproject.com/downloads/obs-studio-32.2.2-macos-intel.dmg"
+   },
+   "sequoia": {
+    "sha256": "f8d8afe3dffdc86efa0698c02ff0c997866bac3e6208ddaf56d37108baacf197",
+    "url": "https://cdn-fastly.obsproject.com/downloads/obs-studio-32.2.2-macos-intel.dmg"
+   },
+   "sonoma": {
+    "sha256": "f8d8afe3dffdc86efa0698c02ff0c997866bac3e6208ddaf56d37108baacf197",
+    "url": "https://cdn-fastly.obsproject.com/downloads/obs-studio-32.2.2-macos-intel.dmg"
+   },
+   "tahoe": {
+    "sha256": "f8d8afe3dffdc86efa0698c02ff0c997866bac3e6208ddaf56d37108baacf197",
+    "url": "https://cdn-fastly.obsproject.com/downloads/obs-studio-32.2.2-macos-intel.dmg"
+   },
+   "ventura": {
+    "sha256": "f8d8afe3dffdc86efa0698c02ff0c997866bac3e6208ddaf56d37108baacf197",
+    "url": "https://cdn-fastly.obsproject.com/downloads/obs-studio-32.2.2-macos-intel.dmg"
+   }
+  },
+  "version": "32.2.2"
+ },
+ {
+  "artifacts": [
+   {
+    "app": [
+     "Obsidian.app"
+    ],
+    "target": "/Applications/Obsidian.app"
+   }
+  ],
+  "auto_updates": true,
+  "container": null,
+  "depends_on": {
+   "macos": {
+    ">=": [
+     "12"
+    ]
+   }
+  },
+  "deprecated": false,
+  "deprecation_reason": null,
+  "desc": "Knowledge base that works on top of a local folder of plain text Markdown files",
+  "disable_reason": null,
+  "disabled": false,
+  "homepage": "https://obsidian.md/",
+  "name": [
+   "Obsidian"
+  ],
+  "sha256": "dcf818dd20ee5d9dd3e782eee0c0c4c47cc225383b051c2fc9af7d5772f59f70",
+  "token": "obsidian",
+  "url": "https://github.com/obsidianmd/obsidian-releases/releases/download/v1.14.4/Obsidian-1.14.4.dmg",
+  "url_specs": {},
+  "variations": {},
+  "version": "1.14.4"
+ },
+ {
+  "artifacts": [
+   {
+    "app": [
+     "Postman.app"
+    ],
+    "target": "/Applications/Postman.app"
+   }
+  ],
+  "auto_updates": true,
+  "container": null,
+  "depends_on": {
+   "macos": {}
+  },
+  "deprecated": false,
+  "deprecation_reason": null,
+  "desc": "Collaboration platform for API development",
+  "disable_reason": null,
+  "disabled": false,
+  "homepage": "https://www.postman.com/",
+  "name": [
+   "Postman"
+  ],
+  "sha256": "d8818462613edfc93006ede7bc613953bf2cff4941dcdcc81de39d4e063ab411",
+  "token": "postman",
+  "url": "https://dl.pstmn.io/download/version/12.32.4/osx_arm64",
+  "url_specs": {},
+  "variations": {
+   "big_sur": {
+    "sha256": "0380b3ea509ca48fe033a127b16140ee4b55bf60dc9e1b7fef5685ad91e6c3b4",
+    "url": "https://dl.pstmn.io/download/version/12.32.4/osx64"
+   },
+   "golden_gate": {
+    "sha256": "0380b3ea509ca48fe033a127b16140ee4b55bf60dc9e1b7fef5685ad91e6c3b4",
+    "url": "https://dl.pstmn.io/download/version/12.32.4/osx64"
+   },
+   "monterey": {
+    "sha256": "0380b3ea509ca48fe033a127b16140ee4b55bf60dc9e1b7fef5685ad91e6c3b4",
+    "url": "https://dl.pstmn.io/download/version/12.32.4/osx64"
+   },
+   "sequoia": {
+    "sha256": "0380b3ea509ca48fe033a127b16140ee4b55bf60dc9e1b7fef5685ad91e6c3b4",
+    "url": "https://dl.pstmn.io/download/version/12.32.4/osx64"
+   },
+   "sonoma": {
+    "sha256": "0380b3ea509ca48fe033a127b16140ee4b55bf60dc9e1b7fef5685ad91e6c3b4",
+    "url": "https://dl.pstmn.io/download/version/12.32.4/osx64"
+   },
+   "tahoe": {
+    "sha256": "0380b3ea509ca48fe033a127b16140ee4b55bf60dc9e1b7fef5685ad91e6c3b4",
+    "url": "https://dl.pstmn.io/download/version/12.32.4/osx64"
+   },
+   "ventura": {
+    "sha256": "0380b3ea509ca48fe033a127b16140ee4b55bf60dc9e1b7fef5685ad91e6c3b4",
+    "url": "https://dl.pstmn.io/download/version/12.32.4/osx64"
+   }
+  },
+  "version": "12.32.4"
+ },
+ {
+  "artifacts": [
+   {
+    "app": [
+     "Raycast.app"
+    ],
+    "target": "/Applications/Raycast.app"
+   }
+  ],
+  "auto_updates": true,
+  "container": null,
+  "depends_on": {
+   "arch": [
+    {
+     "bits": 64,
+     "type": "arm"
+    }
+   ],
+   "macos": {}
+  },
+  "deprecated": false,
+  "deprecation_reason": null,
+  "desc": "Control your tools with a few keystrokes",
+  "disable_reason": null,
+  "disabled": false,
+  "homepage": "https://raycast.com/",
+  "name": [
+   "Raycast"
+  ],
+  "sha256": "359990e7a4529560f2cec7d329dfadc5168461ddb39d96feb227f6e2693f1a66",
+  "token": "raycast",
+  "url": "https://x.raycast-releases.com/download?platform=macos&architecture=arm64&version=2.8.2.0",
+  "url_specs": {},
+  "variations": {
+   "arm64_big_sur": {
+    "depends_on": {
+     "macos": {}
+    },
+    "sha256": "a6fb8f2e097768b74b5ddf9e9f9c127b1fdfa980993a20c0d3b593a2e3fa0534",
+    "url": "https://releases.raycast.com/releases/1.50.0/download?build=arm",
+    "version": "1.50.0"
+   },
+   "arm64_monterey": {
+    "depends_on": {
+     "macos": {}
+    },
+    "sha256": "235082e306ed250026f8afb5f9240dfa3ebf2238cac33d15b18bf673c0a9e896",
+    "url": "https://releases.raycast.com/releases/1.94.4/download?build=arm",
+    "version": "1.94.4"
+   },
+   "arm64_sequoia": {
+    "depends_on": {
+     "macos": {}
+    },
+    "sha256": "5088ee941b7cbcbcacee639b6463cbea08f98eb095d0b6c2516627c248b57a8b",
+    "url": "https://releases.raycast.com/releases/1.104.31/download?build=arm",
+    "version": "1.104.31"
+   },
+   "arm64_sonoma": {
+    "depends_on": {
+     "macos": {}
+    },
+    "sha256": "5088ee941b7cbcbcacee639b6463cbea08f98eb095d0b6c2516627c248b57a8b",
+    "url": "https://releases.raycast.com/releases/1.104.31/download?build=arm",
+    "version": "1.104.31"
+   },
+   "arm64_ventura": {
+    "depends_on": {
+     "macos": {}
+    },
+    "sha256": "5088ee941b7cbcbcacee639b6463cbea08f98eb095d0b6c2516627c248b57a8b",
+    "url": "https://releases.raycast.com/releases/1.104.31/download?build=arm",
+    "version": "1.104.31"
+   },
+   "big_sur": {
+    "depends_on": {
+     "macos": {}
+    },
+    "sha256": "b46f66225fdaed22b59d8c8d319a63961374c7fd47b7b8a40ef5573e6f36e888",
+    "url": "https://releases.raycast.com/releases/1.50.0/download?build=x86_64",
+    "version": "1.50.0"
+   },
+   "monterey": {
+    "depends_on": {
+     "macos": {}
+    },
+    "sha256": "cad71d7846c313b9b71ee3d33c547b3931fa0657109441c0c76e6a725c2bd270",
+    "url": "https://releases.raycast.com/releases/1.94.4/download?build=x86_64",
+    "version": "1.94.4"
+   },
+   "sequoia": {
+    "depends_on": {
+     "macos": {}
+    },
+    "sha256": "88f4f7603f0ebd5ae8332fb8cfedab4c38d609158c17d03f5750b54aeb9913a0",
+    "url": "https://releases.raycast.com/releases/1.104.31/download?build=x86_64",
+    "version": "1.104.31"
+   },
+   "sonoma": {
+    "depends_on": {
+     "macos": {}
+    },
+    "sha256": "88f4f7603f0ebd5ae8332fb8cfedab4c38d609158c17d03f5750b54aeb9913a0",
+    "url": "https://releases.raycast.com/releases/1.104.31/download?build=x86_64",
+    "version": "1.104.31"
+   },
+   "ventura": {
+    "depends_on": {
+     "macos": {}
+    },
+    "sha256": "88f4f7603f0ebd5ae8332fb8cfedab4c38d609158c17d03f5750b54aeb9913a0",
+    "url": "https://releases.raycast.com/releases/1.104.31/download?build=x86_64",
+    "version": "1.104.31"
+   }
+  },
+  "version": "2.8.2.0"
+ },
+ {
+  "artifacts": [
+   {
+    "app": [
+     "Rectangle.app"
+    ],
+    "target": "/Applications/Rectangle.app"
+   }
+  ],
+  "auto_updates": true,
+  "container": null,
+  "depends_on": {
+   "macos": {
+    ">=": [
+     "14"
+    ]
+   }
+  },
+  "deprecated": false,
+  "deprecation_reason": null,
+  "desc": "Move and resize windows using keyboard shortcuts or snap areas",
+  "disable_reason": null,
+  "disabled": false,
+  "homepage": "https://rectangleapp.com/",
+  "name": [
+   "Rectangle"
+  ],
+  "sha256": "a48883b56fbe3fbbd699a05bc8ddbfce65c0c73c66f71eaebbe9f1fdc5a3dcb5",
+  "token": "rectangle",
+  "url": "https://github.com/rxhanson/Rectangle/releases/download/v2.0.3/Rectangle2.0.3.dmg",
+  "url_specs": {},
+  "variations": {},
+  "version": "2.0.3"
+ },
+ {
+  "artifacts": [
+   {
+    "app": [
+     "Sketch.app"
+    ],
+    "target": "/Applications/Sketch.app"
+   }
+  ],
+  "auto_updates": true,
+  "container": null,
+  "depends_on": {
+   "macos": {}
+  },
+  "deprecated": false,
+  "deprecation_reason": null,
+  "desc": "Digital design and prototyping platform",
+  "disable_reason": null,
+  "disabled": false,
+  "homepage": "https://www.sketch.com/",
+  "name": [
+   "Sketch"
+  ],
+  "sha256": "03abbfd6b3594ed6929b53c5e296aed59543f3864fbfbda7c9cf5c43473587cc",
+  "token": "sketch",
+  "url": "https://download.sketch.com/sketch-2026.3.1-234013.zip",
+  "url_specs": {},
+  "variations": {
+   "arm64_big_sur": {
+    "sha256": "3ba2c147aab6b2fcb4b5cc3e3ee7fce3f63551e6ef743a7afe459bd0a87bb4a6",
+    "url": "https://download.sketch.com/sketch-96.3-167315.zip",
+    "version": "96.3,167315"
+   },
+   "arm64_monterey": {
+    "sha256": "e51efde061eb3d5b9b999f7821d0d547114ce5b3ed06c0ca3278d60fb4d92678",
+    "url": "https://download.sketch.com/sketch-100.3-180165.zip",
+    "version": "100.3,180165"
+   },
+   "arm64_sonoma": {
+    "sha256": "97a0b99a69b562747c9b6c2bd6acc15815ff9297144204816344bece13cd4544",
+    "url": "https://download.sketch.com/sketch-2026.2.1-231087.zip",
+    "version": "2026.2.1,231087"
+   },
+   "arm64_ventura": {
+    "sha256": "e6de9d00399f4511711f895c74b909496f690d4f0f4ba66340b158106262e873",
+    "url": "https://download.sketch.com/sketch-101.9-182113.zip",
+    "version": "101.9,182113"
+   },
+   "big_sur": {
+    "sha256": "3ba2c147aab6b2fcb4b5cc3e3ee7fce3f63551e6ef743a7afe459bd0a87bb4a6",
+    "url": "https://download.sketch.com/sketch-96.3-167315.zip",
+    "version": "96.3,167315"
+   },
+   "monterey": {
+    "sha256": "e51efde061eb3d5b9b999f7821d0d547114ce5b3ed06c0ca3278d60fb4d92678",
+    "url": "https://download.sketch.com/sketch-100.3-180165.zip",
+    "version": "100.3,180165"
+   },
+   "sonoma": {
+    "sha256": "97a0b99a69b562747c9b6c2bd6acc15815ff9297144204816344bece13cd4544",
+    "url": "https://download.sketch.com/sketch-2026.2.1-231087.zip",
+    "version": "2026.2.1,231087"
+   },
+   "ventura": {
+    "sha256": "e6de9d00399f4511711f895c74b909496f690d4f0f4ba66340b158106262e873",
+    "url": "https://download.sketch.com/sketch-101.9-182113.zip",
+    "version": "101.9,182113"
+   }
+  },
+  "version": "2026.3.1,234013"
+ },
+ {
+  "artifacts": [
+   {
+    "app": [
+     "Slack.app"
+    ],
+    "target": "/Applications/Slack.app"
+   }
+  ],
+  "auto_updates": true,
+  "container": null,
+  "depends_on": {
+   "macos": {}
+  },
+  "deprecated": false,
+  "deprecation_reason": null,
+  "desc": "Team communication and collaboration software",
+  "disable_reason": null,
+  "disabled": false,
+  "homepage": "https://slack.com/",
+  "name": [
+   "Slack"
+  ],
+  "sha256": "8a5bd759b91478c19f23deef1f21b870a5c3c55b631e3341be32f1c297260331",
+  "token": "slack",
+  "url": "https://downloads.slack-edge.com/desktop-releases/mac/arm64/4.52.178/Slack-4.52.178-macOS.dmg",
+  "url_specs": {},
+  "variations": {
+   "arm64_big_sur": {
+    "sha256": "31a3f08f49e27a1c0d6224a5f0677329217599eccab481620266730566f0abd0",
+    "url": "https://downloads.slack-edge.com/releases/macos/4.45.69/prod/arm64/Slack-4.45.69-macOS.dmg",
+    "version": "4.45.69"
+   },
+   "arm64_monterey": {
+    "sha256": "b22953c06eee150f0324ae71702b2b5a8450efdefbf84439217ef7bfd6a8ab24",
+    "url": "https://downloads.slack-edge.com/desktop-releases/mac/arm64/4.51.191/Slack-4.51.191-macOS.dmg",
+    "version": "4.51.191"
+   },
+   "big_sur": {
+    "sha256": "88ee611b36189ab1e84f39f0fbe0048468d32a24e783303dfe1a3ea0519755e2",
+    "url": "https://downloads.slack-edge.com/releases/macos/4.45.69/prod/x64/Slack-4.45.69-macOS.dmg",
+    "version": "4.45.69"
+   },
+   "golden_gate": {
+    "sha256": "3d68c32bbb0b279c8481060017d0069bf2c6231b91c5199aa71e6c2a4132d2c1",
+    "url": "https://downloads.slack-edge.com/desktop-releases/mac/x64/4.52.178/Slack-4.52.178-macOS.dmg"
+   },
+   "monterey": {
+    "sha256": "1780f8d8dcb0057875f566ecf49623bab8d190e0327e89e0bb3b094a485a73a9",
+    "url": "https://downloads.slack-edge.com/desktop-releases/mac/x64/4.51.191/Slack-4.51.191-macOS.dmg",
+    "version": "4.51.191"
+   },
+   "sequoia": {
+    "sha256": "3d68c32bbb0b279c8481060017d0069bf2c6231b91c5199aa71e6c2a4132d2c1",
+    "url": "https://downloads.slack-edge.com/desktop-releases/mac/x64/4.52.178/Slack-4.52.178-macOS.dmg"
+   },
+   "sonoma": {
+    "sha256": "3d68c32bbb0b279c8481060017d0069bf2c6231b91c5199aa71e6c2a4132d2c1",
+    "url": "https://downloads.slack-edge.com/desktop-releases/mac/x64/4.52.178/Slack-4.52.178-macOS.dmg"
+   },
+   "tahoe": {
+    "sha256": "3d68c32bbb0b279c8481060017d0069bf2c6231b91c5199aa71e6c2a4132d2c1",
+    "url": "https://downloads.slack-edge.com/desktop-releases/mac/x64/4.52.178/Slack-4.52.178-macOS.dmg"
+   },
+   "ventura": {
+    "sha256": "3d68c32bbb0b279c8481060017d0069bf2c6231b91c5199aa71e6c2a4132d2c1",
+    "url": "https://downloads.slack-edge.com/desktop-releases/mac/x64/4.52.178/Slack-4.52.178-macOS.dmg"
+   }
+  },
+  "version": "4.52.178"
+ },
+ {
+  "artifacts": [
+   {
+    "app": [
+     "Sourcetree.app"
+    ],
+    "target": "/Applications/Sourcetree.app"
+   }
+  ],
+  "auto_updates": true,
+  "container": null,
+  "depends_on": {
+   "macos": {}
+  },
+  "deprecated": false,
+  "deprecation_reason": null,
+  "desc": "Graphical client for Git version control",
+  "disable_reason": null,
+  "disabled": false,
+  "homepage": "https://www.sourcetreeapp.com/",
+  "name": [
+   "Atlassian SourceTree"
+  ],
+  "sha256": "f9d6c65ba0b9d774add4977ad0482acde72ce91221e20f3136c009dccdf713bf",
+  "token": "sourcetree",
+  "url": "https://product-downloads.atlassian.com/software/sourcetree/ga/Sourcetree_4.2.19_317.zip",
+  "url_specs": {},
+  "variations": {},
+  "version": "4.2.19,317"
+ },
+ {
+  "artifacts": [
+   {
+    "app": [
+     "Spotify.app"
+    ],
+    "target": "/Applications/Spotify.app"
+   }
+  ],
+  "auto_updates": true,
+  "container": null,
+  "depends_on": {
+   "macos": {
+    ">=": [
+     "13"
+    ]
+   }
+  },
+  "deprecated": false,
+  "deprecation_reason": null,
+  "desc": "Music streaming service",
+  "disable_reason": null,
+  "disabled": false,
+  "homepage": "https://www.spotify.com/",
+  "name": [
+   "Spotify"
+  ],
+  "sha256": "no_check",
+  "token": "spotify",
+  "url": "https://download.scdn.co/SpotifyARM64.dmg",
+  "url_specs": {},
+  "variations": {
+   "golden_gate": {
+    "url": "https://download.scdn.co/Spotify.dmg"
+   },
+   "sequoia": {
+    "url": "https://download.scdn.co/Spotify.dmg"
+   },
+   "sonoma": {
+    "url": "https://download.scdn.co/Spotify.dmg"
+   },
+   "tahoe": {
+    "url": "https://download.scdn.co/Spotify.dmg"
+   },
+   "ventura": {
+    "url": "https://download.scdn.co/Spotify.dmg"
+   }
+  },
+  "version": "1.3.5.3058"
+ },
+ {
+  "artifacts": [
+   {
+    "app": [
+     "Stats.app"
+    ],
+    "target": "/Applications/Stats.app"
+   }
+  ],
+  "auto_updates": true,
+  "container": null,
+  "depends_on": {
+   "macos": {
+    ">=": [
+     "12"
+    ]
+   }
+  },
+  "deprecated": false,
+  "deprecation_reason": null,
+  "desc": "System monitor for the menu bar",
+  "disable_reason": null,
+  "disabled": false,
+  "homepage": "https://github.com/exelban/stats",
+  "name": [
+   "Stats"
+  ],
+  "sha256": "cfa3babb72aba49805c4160a450f370b1352b701116df89125f4868d9d83f777",
+  "token": "stats",
+  "url": "https://github.com/exelban/stats/releases/download/v3.0.21/Stats.dmg",
+  "url_specs": {},
+  "variations": {},
+  "version": "3.0.21"
+ },
+ {
+  "artifacts": [
+   {
+    "app": [
+     "Sublime Text.app"
+    ],
+    "target": "/Applications/Sublime Text.app"
+   }
+  ],
+  "auto_updates": true,
+  "container": null,
+  "depends_on": {
+   "macos": {}
+  },
+  "deprecated": false,
+  "deprecation_reason": null,
+  "desc": "Text editor for code, markup and prose",
+  "disable_reason": null,
+  "disabled": false,
+  "homepage": "https://www.sublimetext.com/",
+  "name": [
+   "Sublime Text"
+  ],
+  "sha256": "a0263f36660f13981bb25b05e968681429ce5f67134876cd9032ffa82e1904d5",
+  "token": "sublime-text",
+  "url": "https://download.sublimetext.com/sublime_text_build_4215_mac.zip",
+  "url_specs": {},
+  "variations": {},
+  "version": "4215"
+ },
+ {
+  "artifacts": [
+   {
+    "app": [
+     "Telegram.app"
+    ],
+    "target": "/Applications/Telegram.app"
+   }
+  ],
+  "auto_updates": true,
+  "container": null,
+  "depends_on": {
+   "macos": {}
+  },
+  "deprecated": false,
+  "deprecation_reason": null,
+  "desc": "Messaging app with a focus on speed and security",
+  "disable_reason": null,
+  "disabled": false,
+  "homepage": "https://macos.telegram.org/",
+  "name": [
+   "Telegram for macOS"
+  ],
+  "sha256": "eae378083774b6d379c328c71989b764fa960e5e4265236e0fc58b8a08014a64",
+  "token": "telegram",
+  "url": "https://osx.telegram.org/updates/Telegram-13.0.283305.app.zip",
+  "url_specs": {},
+  "variations": {},
+  "version": "13.0,283305"
+ },
+ {
+  "artifacts": [
+   {
+    "app": [
+     "The Unarchiver.app"
+    ],
+    "target": "/Applications/The Unarchiver.app"
+   }
+  ],
+  "auto_updates": true,
+  "container": null,
+  "depends_on": {
+   "macos": {}
+  },
+  "deprecated": false,
+  "deprecation_reason": null,
+  "desc": "Unpacks archive files",
+  "disable_reason": null,
+  "disabled": false,
+  "homepage": "https://theunarchiver.com/",
+  "name": [
+   "The Unarchiver"
+  ],
+  "sha256": "d0d8dd2e028519ece5eeb0f018b3392f67e1c85053472ccbbaee64e87f173a28",
+  "token": "the-unarchiver",
+  "url": "https://dl.devmate.com/com.macpaw.site.theunarchiver/147/1742287964/TheUnarchiver-147.zip",
+  "url_specs": {},
+  "variations": {},
+  "version": "4.3.9,147,1742287964"
+ },
+ {
+  "artifacts": [
+   {
+    "app": [
+     "Todoist.app"
+    ],
+    "target": "/Applications/Todoist.app"
+   }
+  ],
+  "auto_updates": true,
+  "container": null,
+  "depends_on": {
+   "macos": {
+    ">=": [
+     "12"
+    ]
+   }
+  },
+  "deprecated": false,
+  "deprecation_reason": null,
+  "desc": "To-do list",
+  "disable_reason": null,
+  "disabled": false,
+  "homepage": "https://todoist.com/home",
+  "name": [
+   "Todoist"
+  ],
+  "sha256": "39bcb7525ee88f282a83a56eaad36a33b0956ffb72eccab896723ec02577930c",
+  "token": "todoist-app",
+  "url": "https://electron-dl.todoist.com/mac/Todoist-darwin-9.31.0-arm64-latest.dmg",
+  "url_specs": {},
+  "variations": {
+   "golden_gate": {
+    "sha256": "bc86f7483444519eb423ff17b3ab8504c69e26d135afec9ef4b68a07257fce53",
+    "url": "https://electron-dl.todoist.com/mac/Todoist-darwin-9.31.0-x64-latest.dmg"
+   },
+   "monterey": {
+    "sha256": "bc86f7483444519eb423ff17b3ab8504c69e26d135afec9ef4b68a07257fce53",
+    "url": "https://electron-dl.todoist.com/mac/Todoist-darwin-9.31.0-x64-latest.dmg"
+   },
+   "sequoia": {
+    "sha256": "bc86f7483444519eb423ff17b3ab8504c69e26d135afec9ef4b68a07257fce53",
+    "url": "https://electron-dl.todoist.com/mac/Todoist-darwin-9.31.0-x64-latest.dmg"
+   },
+   "sonoma": {
+    "sha256": "bc86f7483444519eb423ff17b3ab8504c69e26d135afec9ef4b68a07257fce53",
+    "url": "https://electron-dl.todoist.com/mac/Todoist-darwin-9.31.0-x64-latest.dmg"
+   },
+   "tahoe": {
+    "sha256": "bc86f7483444519eb423ff17b3ab8504c69e26d135afec9ef4b68a07257fce53",
+    "url": "https://electron-dl.todoist.com/mac/Todoist-darwin-9.31.0-x64-latest.dmg"
+   },
+   "ventura": {
+    "sha256": "bc86f7483444519eb423ff17b3ab8504c69e26d135afec9ef4b68a07257fce53",
+    "url": "https://electron-dl.todoist.com/mac/Todoist-darwin-9.31.0-x64-latest.dmg"
+   }
+  },
+  "version": "9.31.0"
+ },
+ {
+  "artifacts": [
+   {
+    "app": [
+     "Visual Studio Code.app"
+    ],
+    "target": "/Applications/Visual Studio Code.app"
+   }
+  ],
+  "auto_updates": true,
+  "container": null,
+  "depends_on": {
+   "macos": {}
+  },
+  "deprecated": false,
+  "deprecation_reason": null,
+  "desc": "Open-source code editor",
+  "disable_reason": null,
+  "disabled": false,
+  "homepage": "https://code.visualstudio.com/",
+  "name": [
+   "Microsoft Visual Studio Code",
+   "VS Code"
+  ],
+  "sha256": "099d3514fda308822a150d65ea36d4c4bfc565ee1b7fbc5a3fff97700f7af408",
+  "token": "visual-studio-code",
+  "url": "https://update.code.visualstudio.com/1.142.0/darwin-arm64/stable",
+  "url_specs": {},
+  "variations": {
+   "arm64_big_sur": {
+    "sha256": "35dd438808dde1dd1f65490ffe7713ed64102324c0809efbec0b4eb2809b218b",
+    "url": "https://update.code.visualstudio.com/1.106.3/darwin-arm64/stable",
+    "version": "1.106.3"
+   },
+   "big_sur": {
+    "sha256": "c41872149a205f3a3be3e5d3a8f04920407a0762531e607f78dc93f4d4813cda",
+    "url": "https://update.code.visualstudio.com/1.106.3/darwin/stable",
+    "version": "1.106.3"
+   },
+   "golden_gate": {
+    "sha256": "cbe7bfbfe576f4315ffd5d4ac67c8dd550972659b7f1785999ed96505f25a31a",
+    "url": "https://update.code.visualstudio.com/1.142.0/darwin/stable"
+   },
+   "monterey": {
+    "sha256": "cbe7bfbfe576f4315ffd5d4ac67c8dd550972659b7f1785999ed96505f25a31a",
+    "url": "https://update.code.visualstudio.com/1.142.0/darwin/stable"
+   },
+   "sequoia": {
+    "sha256": "cbe7bfbfe576f4315ffd5d4ac67c8dd550972659b7f1785999ed96505f25a31a",
+    "url": "https://update.code.visualstudio.com/1.142.0/darwin/stable"
+   },
+   "sonoma": {
+    "sha256": "cbe7bfbfe576f4315ffd5d4ac67c8dd550972659b7f1785999ed96505f25a31a",
+    "url": "https://update.code.visualstudio.com/1.142.0/darwin/stable"
+   },
+   "tahoe": {
+    "sha256": "cbe7bfbfe576f4315ffd5d4ac67c8dd550972659b7f1785999ed96505f25a31a",
+    "url": "https://update.code.visualstudio.com/1.142.0/darwin/stable"
+   },
+   "ventura": {
+    "sha256": "cbe7bfbfe576f4315ffd5d4ac67c8dd550972659b7f1785999ed96505f25a31a",
+    "url": "https://update.code.visualstudio.com/1.142.0/darwin/stable"
+   }
+  },
+  "version": "1.142.0"
+ },
+ {
+  "artifacts": [
+   {
+    "app": [
+     "VLC.app"
+    ],
+    "target": "/Applications/VLC.app"
+   }
+  ],
+  "auto_updates": true,
+  "container": null,
+  "depends_on": {
+   "macos": {}
+  },
+  "deprecated": false,
+  "deprecation_reason": null,
+  "desc": "Multimedia player",
+  "disable_reason": null,
+  "disabled": false,
+  "homepage": "https://www.videolan.org/vlc/",
+  "name": [
+   "VLC media player"
+  ],
+  "sha256": "64a89d93cdd30b0e97131743e246373db82d6826ea882d265d46d74b136da2b7",
+  "token": "vlc",
+  "url": "https://get.videolan.org/vlc/3.0.24/macosx/vlc-3.0.24-arm64.dmg",
+  "url_specs": {},
+  "variations": {
+   "big_sur": {
+    "sha256": "1ef6c903e2dc026d4e58ddf7b2a9ed0eb6f8caf80a9a9f46f96490340b962707",
+    "url": "https://get.videolan.org/vlc/3.0.24/macosx/vlc-3.0.24-intel64.dmg"
+   },
+   "golden_gate": {
+    "sha256": "1ef6c903e2dc026d4e58ddf7b2a9ed0eb6f8caf80a9a9f46f96490340b962707",
+    "url": "https://get.videolan.org/vlc/3.0.24/macosx/vlc-3.0.24-intel64.dmg"
+   },
+   "monterey": {
+    "sha256": "1ef6c903e2dc026d4e58ddf7b2a9ed0eb6f8caf80a9a9f46f96490340b962707",
+    "url": "https://get.videolan.org/vlc/3.0.24/macosx/vlc-3.0.24-intel64.dmg"
+   },
+   "sequoia": {
+    "sha256": "1ef6c903e2dc026d4e58ddf7b2a9ed0eb6f8caf80a9a9f46f96490340b962707",
+    "url": "https://get.videolan.org/vlc/3.0.24/macosx/vlc-3.0.24-intel64.dmg"
+   },
+   "sonoma": {
+    "sha256": "1ef6c903e2dc026d4e58ddf7b2a9ed0eb6f8caf80a9a9f46f96490340b962707",
+    "url": "https://get.videolan.org/vlc/3.0.24/macosx/vlc-3.0.24-intel64.dmg"
+   },
+   "tahoe": {
+    "sha256": "1ef6c903e2dc026d4e58ddf7b2a9ed0eb6f8caf80a9a9f46f96490340b962707",
+    "url": "https://get.videolan.org/vlc/3.0.24/macosx/vlc-3.0.24-intel64.dmg"
+   },
+   "ventura": {
+    "sha256": "1ef6c903e2dc026d4e58ddf7b2a9ed0eb6f8caf80a9a9f46f96490340b962707",
+    "url": "https://get.videolan.org/vlc/3.0.24/macosx/vlc-3.0.24-intel64.dmg"
+   }
+  },
+  "version": "3.0.24"
+ },
+ {
+  "artifacts": [
+   {
+    "app": [
+     "Warp.app"
+    ],
+    "target": "/Applications/Warp.app"
+   }
+  ],
+  "auto_updates": true,
+  "container": null,
+  "depends_on": {},
+  "deprecated": false,
+  "deprecation_reason": null,
+  "desc": "Rust-based terminal",
+  "disable_reason": null,
+  "disabled": false,
+  "homepage": "https://www.warp.dev/terminal",
+  "name": [
+   "Warp"
+  ],
+  "sha256": "866204c9583007b06c0e88e399fe57187150a9ab43ad4000c5935035794025c1",
+  "token": "warp",
+  "url": "https://app.warp.dev/download/brew?version=v0.2026.10.14.08.27.stable_01&package=dmg",
+  "url_specs": {},
+  "variations": {},
+  "version": "0.2026.10.14.08.27.stable_01"
+ },
+ {
+  "artifacts": [
+   {
+    "pkg": [
+     "zoomusInstallerFull.pkg"
+    ]
+   }
+  ],
+  "auto_updates": true,
+  "container": null,
+  "depends_on": {},
+  "deprecated": false,
+  "deprecation_reason": null,
+  "desc": "Video communication and virtual meeting platform",
+  "disable_reason": null,
+  "disabled": false,
+  "homepage": "https://www.zoom.us/",
+  "name": [
+   "Zoom"
+  ],
+  "sha256": "ff15d926ef5a714c6683cc23ed628a7c2fc43d080a88ac54af4e200ba03a2456",
+  "token": "zoom",
+  "url": "https://cdn.zoom.us/prod/7.2.2.88465/arm64/zoomusInstallerFull.pkg",
+  "url_specs": {},
+  "variations": {
+   "big_sur": {
+    "sha256": "492c91d78e5f6e2a4a4228f6e8c5a9e01103d10dbd3465ededc7284e13548e91",
+    "url": "https://cdn.zoom.us/prod/7.2.2.88465/zoomusInstallerFull.pkg"
+   },
+   "golden_gate": {
+    "sha256": "492c91d78e5f6e2a4a4228f6e8c5a9e01103d10dbd3465ededc7284e13548e91",
+    "url": "https://cdn.zoom.us/prod/7.2.2.88465/zoomusInstallerFull.pkg"
+   },
+   "monterey": {
+    "sha256": "492c91d78e5f6e2a4a4228f6e8c5a9e01103d10dbd3465ededc7284e13548e91",
+    "url": "https://cdn.zoom.us/prod/7.2.2.88465/zoomusInstallerFull.pkg"
+   },
+   "sequoia": {
+    "sha256": "492c91d78e5f6e2a4a4228f6e8c5a9e01103d10dbd3465ededc7284e13548e91",
+    "url": "https://cdn.zoom.us/prod/7.2.2.88465/zoomusInstallerFull.pkg"
+   },
+   "sonoma": {
+    "sha256": "492c91d78e5f6e2a4a4228f6e8c5a9e01103d10dbd3465ededc7284e13548e91",
+    "url": "https://cdn.zoom.us/prod/7.2.2.88465/zoomusInstallerFull.pkg"
+   },
+   "tahoe": {
+    "sha256": "492c91d78e5f6e2a4a4228f6e8c5a9e01103d10dbd3465ededc7284e13548e91",
+    "url": "https://cdn.zoom.us/prod/7.2.2.88465/zoomusInstallerFull.pkg"
+   },
+   "ventura": {
+    "sha256": "492c91d78e5f6e2a4a4228f6e8c5a9e01103d10dbd3465ededc7284e13548e91",
+    "url": "https://cdn.zoom.us/prod/7.2.2.88465/zoomusInstallerFull.pkg"
+   }
+  },
+  "version": "7.2.2.88465"
+ }
+]

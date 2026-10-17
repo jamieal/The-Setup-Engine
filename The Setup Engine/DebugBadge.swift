@@ -31,13 +31,11 @@ struct DebugBadge: View {
     }
 
     private var hasActiveOverride: Bool {
-        state.forceNoBrew || state.forceBrewInstallFails || state.fakeAppFailures > 0
+        state.fakeAppFailures > 0
     }
 
     private var label: String {
         var bits = ["DEBUG"]
-        if state.forceNoBrew              { bits.append("NO BREW") }
-        if state.forceBrewInstallFails    { bits.append("BREW FAILS") }
         if state.fakeAppFailures > 0      { bits.append("FAIL \(state.fakeAppFailures)") }
         return bits.joined(separator: " · ")
     }

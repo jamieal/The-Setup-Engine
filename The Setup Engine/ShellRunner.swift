@@ -17,8 +17,12 @@ class ShellRunner: ObservableObject {
     /// Homebrew PATH — covers both Apple Silicon and Intel installs.
     static let brewPaths = "/opt/homebrew/bin:/usr/local/bin"
 
-    /// Fixed log path for admin operations — check this for debugging.
-    static let adminLogPath = "/tmp/the_setup_engine_admin.log"
+    /// Log for admin operations — check this for debugging. Lives in the user's
+    /// own Logs folder rather than shared /tmp, so other accounts can't tamper
+    /// with a file that root writes to.
+    nonisolated static var adminLogPath: String {
+        AppLog.logFileURL.deletingLastPathComponent().appending(path: "admin.log").path
+    }
 
     /// Builds an environment dictionary with Homebrew on the PATH.
     static func brewEnvironment() -> [String: String] {
@@ -81,106 +85,49 @@ class ShellRunner: ObservableObject {
         }
     }
 
-    /// Runs a command with administrator privileges using the native macOS password dialog.
-    /// Writes a temp script, runs it via osascript, logs to /tmp/, streams that log to the UI.
-    /// Never blocks the main actor — waiting is done via `terminationHandler`.
+    /// Runs a script as root behind the native macOS password dialog.
+    ///
+    /// The script never touches disk: it's base64-encoded into the
+    /// `do shell script` call itself, so nothing another process could swap
+    /// sits between the password prompt and root running it. Root's output
+    /// comes back to us, and we (not root) write it to the admin log.
+    /// Returns false if the prompt was cancelled or the script failed to run.
     @discardableResult
     func runWithAdmin(_ command: String) async -> Bool {
         output = ""
         isRunning = true
         defer { isRunning = false }
 
-        let logPath = Self.adminLogPath
-        let scriptPath = "/tmp/the_setup_engine_run.sh"
+        let script = "set -u\nexport PATH=/usr/bin:/bin:/usr/sbin:/sbin\n" + command + "\nexit 0\n"
+        let encoded = Data(script.utf8).base64EncodedString()
+        let appleScript = "do shell script \"/bin/echo \(encoded) | /usr/bin/base64 -D | /bin/bash 2>&1\" with administrator privileges"
 
-        let scriptContent = """
-        #!/bin/bash
-        export PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
-        LOG="\(logPath)"
-        echo "=== The Setup Engine ===" > "$LOG"
-        echo "Started: $(date)" >> "$LOG"
-        echo "========================" >> "$LOG"
-
-        ( \(command) ) >> "$LOG" 2>&1
-        EXIT_CODE=$?
-
-        echo "" >> "$LOG"
-        echo "=== Exit code: $EXIT_CODE ===" >> "$LOG"
-        echo "Finished: $(date)" >> "$LOG"
-        exit $EXIT_CODE
-        """
-
-        do {
-            try scriptContent.write(toFile: scriptPath, atomically: true, encoding: .utf8)
-        } catch {
-            output = "Failed to create script: \(error.localizedDescription)\n"
-            return false
-        }
-
-        // chmod +x — run async so we don't block.
-        let chmod = Process()
-        chmod.executableURL = URL(fileURLWithPath: "/bin/chmod")
-        chmod.arguments = ["+x", scriptPath]
-        _ = await Self.runAsync(chmod)
-
-        FileManager.default.createFile(atPath: logPath, contents: nil)
-
-        // Start tailing the log so the UI sees progress as the install runs.
-        let tailProcess = Process()
-        tailProcess.executableURL = URL(fileURLWithPath: "/usr/bin/tail")
-        tailProcess.arguments = ["-f", logPath]
-        let tailPipe = Pipe()
-        tailProcess.standardOutput = tailPipe
-        try? tailProcess.run()
-
-        let streamTask = Task { [weak self] in
-            let handle = tailPipe.fileHandleForReading
-            do {
-                for try await line in handle.bytes.lines {
-                    guard !Task.isCancelled else { break }
-                    await MainActor.run { self?.output += line + "\n" }
-                }
-            } catch {
-                // expected when tail is terminated
-            }
-        }
-
-        // Run osascript with admin privileges (shows native password dialog).
-        // Wait via terminationHandler — does NOT block the main actor.
-        let appleScript = "do shell script \"/bin/bash \\\"" + scriptPath + "\\\"\" with administrator privileges"
         let osa = Process()
         osa.executableURL = URL(fileURLWithPath: "/usr/bin/osascript")
         osa.arguments = ["-e", appleScript]
-        let osaPipe = Pipe()
-        osa.standardOutput = osaPipe
-        osa.standardError = osaPipe
+        let outPipe = Pipe(), errPipe = Pipe()
+        osa.standardOutput = outPipe
+        osa.standardError = errPipe
 
+        // Drain both pipes while it runs so a chatty installer can't fill them.
+        async let outData = Task.detached { outPipe.fileHandleForReading.readDataToEndOfFile() }.value
+        async let errData = Task.detached { errPipe.fileHandleForReading.readDataToEndOfFile() }.value
         let exitCode = await Self.runAsync(osa)
-
-        // Let tail catch up with the final lines, then cancel.
-        try? await Task.sleep(for: .milliseconds(800))
-        if tailProcess.isRunning {
-            tailProcess.terminate()
+        if exitCode == -1 {
+            try? outPipe.fileHandleForWriting.close()
+            try? errPipe.fileHandleForWriting.close()
         }
-        streamTask.cancel()
+        let stdout = String(decoding: await outData, as: UTF8.self)
+        let stderr = String(decoding: await errData, as: UTF8.self)
 
-        // Capture osascript's own error output (e.g. user cancelled the password dialog).
-        let osaData = osaPipe.fileHandleForReading.readDataToEndOfFile()
-        let osaOutput = String(data: osaData, encoding: .utf8) ?? ""
-
-        // Read the complete log file as the canonical output.
-        if let logData = try? Data(contentsOf: URL(fileURLWithPath: logPath)),
-           let logOutput = String(data: logData, encoding: .utf8),
-           !logOutput.isEmpty {
-            output = logOutput
-        }
-        if !osaOutput.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            output += "\n--- osascript ---\n\(osaOutput)"
+        output = stdout
+        if !stderr.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            output += "\n--- osascript ---\n\(stderr)"
         }
         output += "\n[Process exited with code \(exitCode)]\n"
-        output += "[Log saved to \(logPath)]\n"
 
-        try? FileManager.default.removeItem(atPath: scriptPath)
+        let log = "=== The Setup Engine — admin run \(Date()) ===\n" + script + "\n=== output ===\n" + output
+        try? log.write(toFile: Self.adminLogPath, atomically: true, encoding: .utf8)
         return exitCode == 0
     }
 }

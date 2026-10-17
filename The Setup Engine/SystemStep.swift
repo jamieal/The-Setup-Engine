@@ -95,7 +95,7 @@ struct SystemStep: View {
     }
 }
 
-private struct SettingCard<Trailing: View>: View {
+struct SettingCard<Trailing: View>: View {
     let symbol: String
     let title: String
     let description: String

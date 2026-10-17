@@ -1,0 +1,77 @@
+#!/bin/bash
+#
+# Publish a folder of photos as The Setup Engine's wallpaper collection.
+#
+# Makes a thumbnail for each photo, strips all metadata (GPS location, camera,
+# dates — release files are public), writes wallpapers.json (title, credit,
+# links, SHA-256), and uploads everything to the GitHub release tagged
+# "wallpapers" on this repo. The app reads that release; nothing else to do.
+#
+# Usage:
+#   scripts/publish-wallpapers.sh ~/Pictures/Wallpaper\ picks
+#   CREDIT="Photo by Jamie Cras" scripts/publish-wallpapers.sh <folder>
+#   DRY_RUN=1 scripts/publish-wallpapers.sh <folder>   # build + print, no upload
+#
+# Photos: JPEG, HEIC or PNG, ideally 5K (5120×2880). The file name becomes the
+# title: "golden-hour-dublin.jpg" → "Golden Hour Dublin", and
+# "Snow in Ghent.jpg" stays "Snow in Ghent".
+# Needs: gh (signed in), sips and shasum (built into macOS), swiftc (Xcode or
+# Command Line Tools).
+
+set -euo pipefail
+
+SRC="${1:?Usage: $0 <folder of photos>}"
+CREDIT="$(echo "${CREDIT:-Photo by Jamie Cras}" | tr -d '"\\')"
+TAG="wallpapers"
+REPO="${REPO:-$(gh repo view --json nameWithOwner -q .nameWithOwner)}"
+BASE="https://github.com/$REPO/releases/download/$TAG"
+OUT="$(mktemp -d)"
+trap 'rm -rf "$OUT"' EXIT
+HERE="$(cd "$(dirname "$0")" && pwd)"
+swiftc -O "$HERE/strip-photo-metadata.swift" -o "$OUT/.strip" 2>/dev/null \
+    || { echo "Couldn't build the metadata stripper (needs swiftc)"; exit 1; }
+
+entries=()
+shopt -s nullglob nocaseglob
+for photo in "$SRC"/*.{jpg,jpeg,heic,png}; do
+    name="$(basename "${photo%.*}")"
+    # Release asset names can't have spaces; make a clean slug.
+    slug="$(echo "$name" | tr '[:upper:]' '[:lower:]' | tr -cs 'a-z0-9' '-' | sed 's/^-//;s/-$//')"
+    title="$(echo "$name" | tr -d '"\\' | tr '_-' '  ')"
+    # Title-case all-lowercase names ("golden-hour" → "Golden Hour"); keep
+    # names that already have capitals as written ("Snow in Ghent").
+    if [ "$title" = "$(echo "$title" | tr '[:upper:]' '[:lower:]')" ]; then
+        title="$(echo "$title" | awk '{for(i=1;i<=NF;i++) $i=toupper(substr($i,1,1)) substr($i,2)} 1')"
+    fi
+
+    # sips keeps GPS and camera data, so re-save both files without metadata.
+    sips -s format jpeg -s formatOptions 90 "$photo" --out "$OUT/.full.jpg" >/dev/null
+    sips -Z 640 -s format jpeg -s formatOptions 75 "$photo" --out "$OUT/.thumb.jpg" >/dev/null
+    "$OUT/.strip" "$OUT/.full.jpg" "$OUT/$slug.jpg"
+    "$OUT/.strip" "$OUT/.thumb.jpg" "$OUT/$slug-thumb.jpg"
+    rm -f "$OUT/.full.jpg" "$OUT/.thumb.jpg"
+    sha="$(shasum -a 256 "$OUT/$slug.jpg" | cut -d' ' -f1)"
+
+    entries+=("$(printf '{"id":"%s","title":"%s","credit":"%s","thumb":"%s/%s-thumb.jpg","full":"%s/%s.jpg","sha256":"%s"}' \
+        "$slug" "$title" "$CREDIT" "$BASE" "$slug" "$BASE" "$slug" "$sha")")
+    echo "✓ $title"
+done
+
+[ ${#entries[@]} -gt 0 ] || { echo "No photos found in $SRC"; exit 1; }
+
+{ printf '{"photos":['; (IFS=,; printf '%s' "${entries[*]}"); printf ']}\n'; } > "$OUT/wallpapers.json"
+
+if [ -n "${DRY_RUN:-}" ]; then
+    ls -la "$OUT"
+    cat "$OUT/wallpapers.json"
+    exit 0
+fi
+
+if ! gh release view "$TAG" >/dev/null 2>&1; then
+    gh release create "$TAG" --title "Wallpapers" \
+        --notes "Wallpaper collection for The Setup Engine. Managed by scripts/publish-wallpapers.sh."
+fi
+gh release upload "$TAG" "$OUT"/[!.]*.jpg "$OUT/wallpapers.json" --clobber
+
+echo ""
+echo "Published ${#entries[@]} wallpapers to $BASE/wallpapers.json"

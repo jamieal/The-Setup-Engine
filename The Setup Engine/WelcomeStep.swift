@@ -23,7 +23,7 @@ struct WelcomeStep: View {
                 .multilineTextAlignment(.center)
                 .padding(.bottom, 16)
 
-            Text("Apps, system preferences, and personal touches —\nset up your Mac in a few minutes, no terminal required.")
+            Text("Your apps, your Dock, your Mac — set up once, the way you like it.\nThen it's gone.")
                 .font(.title3)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
@@ -35,7 +35,6 @@ struct WelcomeStep: View {
 
             Button {
                 coordinator.next()
-                Task { await coordinator.checkHomebrew() }
             } label: {
                 Text("Get Started")
                     .font(.body.weight(.semibold))
@@ -43,16 +42,27 @@ struct WelcomeStep: View {
             }
             .buttonStyle(.borderedProminent)
             .controlSize(.extraLarge)
-            .padding(.bottom, 36)
+            .padding(.bottom, 12)
+
+            HStack(spacing: 18) {
+                Button("Use a recipe…") { RecipeInbox.shared.chooseAndOpen() }
+                    .help("Set up this Mac from a .setuprecipe file")
+                Text("·").foregroundStyle(.tertiary)
+                Button("Save this Mac as a recipe…") { RecipeInbox.shared.exportThisMacRequested = true }
+                    .help("Record this Mac's apps, Dock and settings to set up your next Mac the same way")
+            }
+            .buttonStyle(.link)
+            .font(.callout)
+            .padding(.bottom, 28)
         }
         .padding(.horizontal, 40)
     }
 
     private var featureGrid: some View {
         HStack(spacing: 24) {
-            featureCard(symbol: "app.badge.checkmark", title: "Install apps", subtitle: "Pick a profile or add your own")
-            featureCard(symbol: "slider.horizontal.3", title: "Tune settings", subtitle: "Dock, dark mode, Finder")
-            featureCard(symbol: "checkmark.seal",      title: "Done in minutes", subtitle: "Sit back, no commands")
+            featureCard(symbol: "app.badge.checkmark", title: "Straight from the makers", subtitle: "Every app checked with Apple")
+            featureCard(symbol: "person.crop.square",  title: "Yours, not a copy", subtitle: "Dock, wallpaper, folders, Touch ID")
+            featureCard(symbol: "sparkles",            title: "Then it's gone", subtitle: "A receipt, undo, and no trace left")
         }
         .frame(maxWidth: 700)
     }

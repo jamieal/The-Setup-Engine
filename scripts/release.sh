@@ -60,7 +60,7 @@ xcodebuild \
     -project "$PROJECT" \
     -scheme "$SCHEME" \
     -configuration Release \
-    -destination 'platform=macOS' \
+    -destination 'generic/platform=macOS' \
     -derivedDataPath "$DERIVED" \
     "${SIGN_ARGS[@]}" \
     build \
@@ -69,7 +69,7 @@ xcodebuild \
     -project "$PROJECT" \
     -scheme "$SCHEME" \
     -configuration Release \
-    -destination 'platform=macOS' \
+    -destination 'generic/platform=macOS' \
     -derivedDataPath "$DERIVED" \
     "${SIGN_ARGS[@]}" \
     build

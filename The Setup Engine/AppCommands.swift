@@ -15,8 +15,12 @@ struct AppCommands: Commands {
             }
         }
 
-        // File menu — diagnostic actions live here for visibility.
+        // File menu — recipes, then diagnostic actions.
         CommandGroup(after: .newItem) {
+            Button("Open Recipe…") { RecipeInbox.shared.chooseAndOpen() }
+                .keyboardShortcut("o", modifiers: .command)
+            Button("Save This Mac as a Recipe…") { RecipeInbox.shared.exportThisMacRequested = true }
+
             Divider()
             Button("Collect Diagnostic Logs…") {
                 collectAndRevealLogs()
@@ -46,9 +50,9 @@ struct AppCommands: Commands {
 
     private static var aboutCredits: NSAttributedString {
         let body = """
-        A guided macOS setup workflow built with SwiftUI.
+        Set up once. Then it's gone.
 
-        Installs apps via Homebrew Cask, configures system preferences, all without touching Terminal.
+        Installs your apps straight from their makers, checks each one with Apple, makes the Mac yours, hands you a receipt — and removes itself.
 
         github.com/jamieal/The-Setup-Engine
         """

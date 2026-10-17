@@ -1,8 +1,11 @@
+import Combine
 import SwiftUI
+import UniformTypeIdentifiers
 
 struct SetupContainerView: View {
     @StateObject private var coordinator = SetupCoordinator()
     @ObservedObject private var shortcuts = AppShortcuts.shared
+    @ObservedObject private var recipes = RecipeInbox.shared
 
     var body: some View {
         ZStack {
@@ -23,10 +26,10 @@ struct SetupContainerView: View {
                 Group {
                     switch coordinator.currentStep {
                     case .welcome:  WelcomeStep()
-                    case .homebrew: HomebrewStep()
                     case .profile:  ProfileStep()
                     case .apps:     AppsStep()
                     case .system:   SystemStep()
+                    case .personalise: PersonaliseStep()
                     case .review:   ReviewStep()
                     case .install:  InstallStep()
                     case .done:     DoneStep()
@@ -46,6 +49,37 @@ struct SetupContainerView: View {
         .environmentObject(coordinator)
         .task {
             await coordinator.preflight()
+            #if DEBUG
+            await DebugAutopilot.run(coordinator)
+            #endif
+        }
+        .onChange(of: coordinator.currentStep) {
+            recipes.acceptsRecipes = coordinator.currentStep.rawValue < SetupCoordinator.Step.install.rawValue
+        }
+        .onReceive(recipes.$pending.compactMap { $0 }) { recipe in
+            recipes.pending = nil
+            Task { await coordinator.apply(recipe: recipe) }
+        }
+        .onReceive(recipes.$exportThisMacRequested.filter { $0 }) { _ in
+            recipes.exportThisMacRequested = false
+            Task { RecipeSaver.save(await coordinator.recipeFromThisMac()) }
+        }
+        .alert("Couldn't open recipe", isPresented: Binding(
+            get: { recipes.error != nil },
+            set: { if !$0 { recipes.error = nil } }
+        )) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(recipes.error ?? "")
+        }
+        // Drop a .setuprecipe file anywhere on the window to load it.
+        .onDrop(of: [.fileURL], isTargeted: nil) { providers in
+            guard let provider = providers.first else { return false }
+            _ = provider.loadObject(ofClass: URL.self) { url, _ in
+                guard let url, url.pathExtension == SetupRecipe.fileExtension else { return }
+                DispatchQueue.main.async { RecipeInbox.shared.open(url) }
+            }
+            return true
         }
         .sheet(isPresented: $shortcuts.quickSearchOpen) {
             QuickSearchOverlay()
@@ -106,7 +140,8 @@ struct SetupContainerView: View {
 
     @ViewBuilder
     private var footer: some View {
-        if coordinator.currentStep != .welcome {
+        // Welcome and Done carry their own buttons.
+        if coordinator.currentStep != .welcome && coordinator.currentStep != .done {
             HStack {
                 if coordinator.canGoBack {
                     Button("Back") { coordinator.back() }
@@ -129,25 +164,6 @@ struct SetupContainerView: View {
     @ViewBuilder
     private var primaryButton: some View {
         switch coordinator.currentStep {
-        case .homebrew:
-            switch coordinator.homebrewStatus {
-            case .notInstalled, .failed:
-                Button(coordinator.primaryActionTitle) {
-                    Task { await coordinator.installHomebrew() }
-                }
-                .buttonStyle(.borderedProminent)
-                .controlSize(.large)
-            case .installed:
-                Button("Continue") { coordinator.next() }
-                    .buttonStyle(.borderedProminent)
-                    .controlSize(.large)
-            default:
-                Button(coordinator.primaryActionTitle) {}
-                    .buttonStyle(.borderedProminent)
-                    .controlSize(.large)
-                    .disabled(true)
-            }
-
         case .done:
             Button("Quit") { NSApp.terminate(nil) }
                 .buttonStyle(.borderedProminent)

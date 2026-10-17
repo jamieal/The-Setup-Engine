@@ -87,6 +87,7 @@ nonisolated struct DirectInstaller: Sendable {
 
         var root = try await Self.unpack(download, into: workDir.appending(path: "payload"),
                                          nakedName: r.pkgs.first?.name ?? r.apps.first?.source)
+        try? FileManager.default.removeItem(at: download)
         if let nested = r.nestedContainer {
             let inner = root.appending(path: nested)
             guard FileManager.default.fileExists(atPath: inner.path) else {
@@ -150,22 +151,55 @@ nonisolated struct DirectInstaller: Sendable {
         try? FileManager.default.removeItem(at: staged.workDir)
     }
 
+    func cleanUp(token: String) {
+        try? FileManager.default.removeItem(at: workRoot.appending(path: token))
+    }
+
     func cleanUpAll() {
         try? FileManager.default.removeItem(at: workRoot)
     }
 
+    /// Removes work folders left by earlier runs that quit or crashed.
+    func sweepStaleWorkFolders() {
+        let parent = workRoot.deletingLastPathComponent()
+        let mine = workRoot.lastPathComponent
+        for name in (try? FileManager.default.contentsOfDirectory(atPath: parent.path)) ?? []
+            where name.hasPrefix("TheSetupEngine-") && name != mine {
+            try? FileManager.default.removeItem(at: parent.appending(path: name))
+        }
+    }
+
     /// One root shell script for everything that needs a password. Each item
     /// reports `TSE_OK <token>` or `TSE_FAIL <token>` so results can be matched up.
+    ///
+    /// Staged files live in the user's temp folder, which anything running as
+    /// the user could tamper with after our checks. So root first copies each
+    /// item into its own root-only folder, verifies the signature again on that
+    /// copy, and installs only from the copy.
     func adminScript(apps: [StagedApp], pkgs: [StagedPkg]) -> String {
-        var lines: [String] = []
-        for pkg in pkgs {
-            var cmd = "/usr/sbin/installer -pkg \(Self.quote(pkg.file.path)) -target /"
-            if let xml = pkg.choicesXML { cmd += " -applyChoiceChangesXML \(Self.quote(xml.path))" }
-            lines.append("if \(cmd); then echo \(Self.quote("TSE_OK \(pkg.token)")); else echo \(Self.quote("TSE_FAIL \(pkg.token)")); fi")
+        var lines = [
+            "TSE_ROOT=$(/usr/bin/mktemp -d /private/tmp/tse-root.XXXXXX) || exit 1",
+            "trap '/bin/rm -rf \"$TSE_ROOT\"' EXIT",
+        ]
+        for (i, pkg) in pkgs.enumerated() {
+            let copy = "\"$TSE_ROOT/p\(i).pkg\""
+            var install = "/usr/sbin/installer -pkg \(copy) -target /"
+            var prepare = "/bin/cp \(Self.quote(pkg.file.path)) \(copy)"
+            if let xml = pkg.choicesXML {
+                prepare += " && /bin/cp \(Self.quote(xml.path)) \"$TSE_ROOT/p\(i).xml\""
+                install += " -applyChoiceChangesXML \"$TSE_ROOT/p\(i).xml\""
+            }
+            let verify = "/usr/sbin/pkgutil --check-signature \(copy) >/dev/null && /usr/sbin/spctl --assess --type install \(copy) 2>/dev/null"
+            lines.append("if \(prepare) && \(verify) && \(install); then echo \(Self.quote("TSE_OK \(pkg.token)")); else echo \(Self.quote("TSE_FAIL \(pkg.token)")); fi")
         }
-        for app in apps {
-            let dest = applicationsDir.appending(path: app.target).path
-            lines.append("if [ -e \(Self.quote(dest)) ] || /usr/bin/ditto \(Self.quote(app.source.path)) \(Self.quote(dest)); then echo \(Self.quote("TSE_OK \(app.token)")); else echo \(Self.quote("TSE_FAIL \(app.token)")); fi")
+        for (i, app) in apps.enumerated() {
+            let dest = Self.quote(applicationsDir.appending(path: app.target).path)
+            // Fixed name for the root copy: nothing from the catalog goes inside
+            // double quotes. The bundle's name doesn't affect signature checks.
+            let copy = "\"$TSE_ROOT/a\(i).app\""
+            let prepare = "/usr/bin/ditto \(Self.quote(app.source.path)) \(copy)"
+            let verify = "/usr/bin/codesign --verify \(copy) && /usr/sbin/spctl --assess --type execute \(copy) 2>/dev/null"
+            lines.append("if [ -e \(dest) ] || { \(prepare) && \(verify) && /usr/bin/ditto \(copy) \(dest); }; then echo \(Self.quote("TSE_OK \(app.token)")); else echo \(Self.quote("TSE_FAIL \(app.token)")); fi")
         }
         return lines.joined(separator: "\n")
     }
@@ -316,7 +350,12 @@ nonisolated struct DirectInstaller: Sendable {
                                ["attach", "-nobrowse", "-readonly", "-noautoopen", "-noverify",
                                 "-mountrandom", mountRoot.path, "-plist", dmg.path],
                                stdin: "Y\n")
-        guard attach.status == 0, let mount = mountPoint(fromPlist: attach.stdout) else {
+        guard attach.status == 0 else { throw InstallFailure.unrecognisedDownload }
+        guard let mount = mountPoint(fromPlist: attach.stdout) else {
+            // Attached but unreadable output: detach whatever landed under our mount root.
+            for leftover in (try? FileManager.default.contentsOfDirectory(atPath: mountRoot.path)) ?? [] {
+                _ = await run("/usr/bin/hdiutil", ["detach", "-force", mountRoot.appending(path: leftover).path])
+            }
             throw InstallFailure.unrecognisedDownload
         }
         let copied = await run("/usr/bin/ditto", [mount, dir.path])
@@ -336,17 +375,37 @@ nonisolated struct DirectInstaller: Sendable {
     }
 
     /// Finds an artifact at its expected path, or by name a few levels down.
+    /// Refuses anything that would lead outside the download: ".." or absolute
+    /// paths from the catalog, and symlinks (Gatekeeper would check the link's
+    /// target while we'd install the link itself).
     static func locate(_ relativePath: String, in root: URL) -> URL? {
+        let parts = relativePath.split(separator: "/")
+        guard !relativePath.hasPrefix("/"), !parts.contains(where: { $0 == ".." }) else {
+            AppLog.error(.install, "Refusing catalog path outside the download: \(relativePath)")
+            return nil
+        }
+        func acceptable(_ url: URL) -> Bool {
+            let isLink = (try? url.resourceValues(forKeys: [.isSymbolicLinkKey]))?.isSymbolicLink ?? false
+            let inside = url.standardizedFileURL.path.hasPrefix(root.standardizedFileURL.path + "/")
+            if isLink { AppLog.error(.install, "Refusing symlink in download: \(url.lastPathComponent)") }
+            return !isLink && inside
+        }
         let direct = root.appending(path: relativePath)
-        if FileManager.default.fileExists(atPath: direct.path) { return direct }
+        if (try? direct.checkResourceIsReachable()) == true || isSymlink(direct) {
+            return acceptable(direct) ? direct : nil
+        }
         let name = (relativePath as NSString).lastPathComponent
-        guard let walker = FileManager.default.enumerator(at: root, includingPropertiesForKeys: nil) else { return nil }
+        guard let walker = FileManager.default.enumerator(at: root, includingPropertiesForKeys: [.isSymbolicLinkKey]) else { return nil }
         for case let url as URL in walker {
             if walker.level > 3 { walker.skipDescendants(); continue }
-            if url.lastPathComponent == name { return url }
+            if url.lastPathComponent == name { return acceptable(url) ? url : nil }
             if url.pathExtension == "app" || url.pathExtension == "pkg" { walker.skipDescendants() }
         }
         return nil
+    }
+
+    private static func isSymlink(_ url: URL) -> Bool {
+        (try? FileManager.default.destinationOfSymbolicLink(atPath: url.path)) != nil
     }
 
     // MARK: - Trust
@@ -354,6 +413,15 @@ nonisolated struct DirectInstaller: Sendable {
     /// Asks Gatekeeper whether Apple trusts this app or package (Developer ID
     /// signed and notarized, or from the App Store). Returns the signer too.
     static func gatekeeperAccepts(_ item: URL, type: String) async -> (Bool, String?) {
+        // Check the signature directly too: if someone has switched Gatekeeper
+        // off, spctl approves everything ("override=security disabled").
+        let signature = type == "install"
+            ? await run("/usr/sbin/pkgutil", ["--check-signature", item.path])
+            : await run("/usr/bin/codesign", ["--verify", item.path])
+        guard signature.status == 0 else {
+            AppLog.warn(.install, "Signature check failed for \(item.lastPathComponent): \(String(decoding: signature.stderr, as: UTF8.self))")
+            return (false, nil)
+        }
         let result = await run("/usr/sbin/spctl", ["--assess", "--type", type, "-vv", item.path])
         let text = String(decoding: result.stdout + result.stderr, as: UTF8.self)
         let signer = text.split(separator: "\n")

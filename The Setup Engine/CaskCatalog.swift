@@ -34,6 +34,8 @@ nonisolated struct CaskRecord: Codable, Sendable, Hashable {
         var userAgent: String?
         var referer: String?
         var headers: [String] = []
+        /// Cookies, POST requests or form data — not supported by our downloader.
+        var unsupported = false
     }
 
     /// Fields a `variations` entry can override for one chip + macOS combination.
@@ -70,7 +72,6 @@ nonisolated struct CaskRecord: Codable, Sendable, Hashable {
     var variations: [String: Override]
 
     var isInstallable: Bool { !apps.isEmpty || !pkgs.isEmpty }
-    var needsAdmin: Bool { apps.isEmpty && !pkgs.isEmpty }
 }
 
 /// A record with this Mac's variation applied, plus whether it can install here.
@@ -110,7 +111,7 @@ nonisolated struct ResolvedCask: Sendable, Hashable {
             unavailableReason = "Needs macOS \(min) or later"
         } else if let max = r.maxMacOS, let m = Self.major(max), macOSMajor > m {
             unavailableReason = "Doesn't support this version of macOS"
-        } else if !r.isInstallable {
+        } else if !r.isInstallable || r.urlSpecs.unsupported {
             unavailableReason = "Can't be installed by The Setup Engine yet"
         } else {
             unavailableReason = nil
@@ -234,6 +235,7 @@ nonisolated enum CaskParser {
         specs.referer = dict["referer"] as? String
         if let h = dict["header"] as? String { specs.headers = [h] }
         if let h = dict["header"] as? [String] { specs.headers = h }
+        specs.unsupported = dict["cookies"] != nil || dict["using"] != nil || dict["data"] != nil
         return specs
     }
 }
@@ -265,16 +267,18 @@ final class CaskCatalog: ObservableObject {
     nonisolated private static var cacheFile: URL { cacheDirectory.appending(path: "catalog.json") }
     nonisolated private static var etagFile: URL { cacheDirectory.appending(path: "catalog.etag") }
 
-    /// Loads cache/snapshot immediately, then refreshes from the network.
-    /// Safe to call repeatedly; only the first call does any work.
+    /// Loads the cache (or bundled snapshot) and returns; a refresh from the
+    /// network carries on in the background. Safe to call repeatedly.
     func load() async {
         if let loadTask { return await loadTask.value }
         let task = Task {
             let local = await Task.detached { Self.loadLocal() }.value
             self.install(local)
-            if let fresh = await Task.detached(operation: { await Self.fetchRemote() }).value {
-                self.install(fresh)
-                self.isFresh = true
+            Task {
+                if let fresh = await Task.detached(operation: { await Self.fetchRemote() }).value {
+                    self.install(fresh)
+                    self.isFresh = true
+                }
             }
         }
         loadTask = task
@@ -326,11 +330,15 @@ final class CaskCatalog: ObservableObject {
     // MARK: Loading
 
     nonisolated private static func loadLocal() -> [CaskRecord] {
-        if let data = try? Data(contentsOf: cacheFile),
-           let cached = try? JSONDecoder().decode([CaskRecord].self, from: data),
-           !cached.isEmpty {
-            AppLog.info(.catalog, "Loaded \(cached.count) apps from cache")
-            return cached
+        if let data = try? Data(contentsOf: cacheFile) {
+            if let cached = try? JSONDecoder().decode([CaskRecord].self, from: data), !cached.isEmpty {
+                AppLog.info(.catalog, "Loaded \(cached.count) apps from cache")
+                return cached
+            }
+            // Written by an older version in a different format: drop it (and
+            // its ETag) so the next refresh downloads the full catalog again.
+            try? FileManager.default.removeItem(at: cacheFile)
+            try? FileManager.default.removeItem(at: etagFile)
         }
         if let url = Bundle.main.url(forResource: "CatalogSnapshot", withExtension: "json"),
            let data = try? Data(contentsOf: url),

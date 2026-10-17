@@ -12,7 +12,7 @@ What started as a shell script is now this SwiftUI app that walks anyone through
 
 If you're setting up a brand new Mac — or wipe yours as often as I do — I hope it cuts the mundane out of it.
 
-**Requirements:** macOS 14 (Sonoma) or later, Apple Silicon or Intel. No Homebrew needed for apps.
+**Requirements:** macOS 14 (Sonoma) or later, Apple Silicon or Intel. Most apps don't need Homebrew.
 
 ## How to use
 
@@ -28,7 +28,7 @@ Five curated profiles: **Developer**, **Designer**, **Office**, **Media**, or **
 
 ![Apps step](screenshots/composite/05-apps.png)
 
-The full catalogue, grouped by category. Already-installed apps are greyed out with a green check (the app reads `/Applications` and `~/Applications`). Apps in your queue go to the **To install** rail on the right. Paid/freemium apps get a small badge so you know what you're committing to, and apps that can't run on this Mac (say, Apple Silicon only on an Intel Mac) say why. **⌘K** searches Homebrew's whole catalog of about 5,000 apps from anywhere.
+The full catalogue, grouped by category. Already-installed apps are greyed out with a green check (the app reads `/Applications` and `~/Applications`). Apps in your queue go to the **To install** rail on the right. Paid/freemium apps get a small badge so you know what you're committing to, and apps that can't run on this Mac (say, Apple Silicon only on an Intel Mac) say why. **⌘K** searches Homebrew's whole catalog of about 4,000 installable apps from anywhere.
 
 ### 3. System — tune preferences
 
@@ -90,10 +90,10 @@ For each app:
 1. Download it from the maker (the Intel or Apple Silicon build, as appropriate).
 2. Check the file against the catalog's SHA-256 checksum. A few makers (Chrome, Spotify) publish none, so step 4 carries those.
 3. Unpack it: disk image, zip, tarball or installer package.
-4. Ask Gatekeeper (`spctl --assess`) whether Apple trusts it: Developer ID signed and notarized. Anything Apple won't vouch for isn't installed.
+4. Check its signature (`codesign --verify`, or `pkgutil --check-signature` for packages) and ask Gatekeeper (`spctl --assess`) whether Apple trusts it: Developer ID signed and notarized. Anything Apple won't vouch for isn't installed, and symlinks or paths leading outside the download are refused.
 5. Move the app into `/Applications`. No password needed for an admin account. Installer packages run with `installer` behind a single password prompt.
 
-**Homebrew is only used for command-line tools.** If you pick any and Homebrew is missing, the app installs it with Homebrew's official, notarized installer package (Apple Silicon, macOS 15+). Homebrew no longer installs on Intel Macs, so there command-line tools need an existing Homebrew.
+**Homebrew is only used for command-line tools**, plus the few apps whose makers only serve downloads to Homebrew (currently Blender and Warp). If you pick any and Homebrew is missing, the app installs it with Homebrew's official, notarized installer package (Apple Silicon, macOS 15+). Homebrew no longer installs on Intel Macs, so there those need an existing Homebrew.
 
 The catalog is cached in `~/Library/Caches/TheSetupEngine/` and refreshed with an ETag. A snapshot of the curated apps ships in the app (`CatalogSnapshot.json`) so the first launch works offline. A weekly GitHub Action (`.github/workflows/catalog-check.yml`) flags any curated app Homebrew deprecates or disables, and opens a PR refreshing the snapshot (`scripts/update-catalog-snapshot.py`).
 
@@ -106,7 +106,7 @@ Single-target SwiftUI app. No Swift Package dependencies.
 - **Step views** — `WelcomeStep`, `ProfileStep`, `AppsStep`, `SystemStep`, `ReviewStep`, `InstallStep`, `DoneStep`.
 - **`CaskCatalog`** — loads, caches and searches Homebrew's app catalog; resolves each app's download for this Mac's chip and macOS.
 - **`DirectInstaller`** — download → checksum → unpack → Gatekeeper → move into Applications.
-- **`HomebrewSupport`** — installs Homebrew (official .pkg) and formulae, only for command-line tools.
+- **`HomebrewSupport`** — installs Homebrew (official .pkg), formulae, and the few Homebrew-only apps.
 - **`MacEnvironment`** — chip, macOS version and codename.
 - **`ShellRunner`** — async shell exec with non-blocking termination handling. `runWithAdmin` uses `osascript … with administrator privileges` for the one password prompt.
 - **`AppLog`** — lightweight logger; mirrors to `~/Library/Application Support/TheSetupEngine/Logs/`.
@@ -117,11 +117,12 @@ Single-target SwiftUI app. No Swift Package dependencies.
 
 ## Safety notes
 
-Most apps install with no password at all. Only installer packages (and Homebrew, if needed) run as root, together, via `osascript with administrator privileges`. That root script:
+Most apps install with no password at all. Installer packages, Homebrew (if needed), Touch ID for sudo, and app copies on standard (non-admin) accounts run as root, together, behind one `osascript with administrator privileges` prompt. That root script:
 
-- Only runs `installer -pkg` on packages Gatekeeper has already accepted, and `ditto` into `/Applications`
-- Quotes every path, and is written to the user's private temp folder (not shared `/tmp`)
-- Logs everything it does to `~/Library/Application Support/TheSetupEngine/Logs/admin.log`
+- Is passed inline to the prompt, never written to a file another process could swap
+- Copies each package or app into a root-only temp folder, re-checks its signature there (`pkgutil --check-signature` / `codesign --verify`, plus Gatekeeper), and installs only from that copy, so nothing can be swapped in after the checks
+- Quotes every path, and puts nothing from the catalog inside double quotes
+- Has its output logged by the app (not by root) to `~/Library/Application Support/TheSetupEngine/Logs/admin.log`
 
 The system preferences step uses `defaults write` and `killall Dock` / `killall Finder` — all non-destructive and reversible from System Settings.
 

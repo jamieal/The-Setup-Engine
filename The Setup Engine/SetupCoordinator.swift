@@ -244,9 +244,12 @@ final class SetupCoordinator: ObservableObject {
         return app.kind == .app ? "Its maker only allows downloads through Homebrew" : why
     }
 
-    /// True if installing this app will ask for the Mac's password.
+    /// True if installing this app will ask for the Mac's password: it uses
+    /// Apple's installer, or this account can't write to /Applications
+    /// (a standard, non-admin account).
     func needsPassword(_ app: AppEntry) -> Bool {
-        !usesHomebrew(app) && catalog.cask(app.caskName)?.record.needsAdmin == true
+        guard !usesHomebrew(app), let record = catalog.cask(app.caskName)?.record else { return false }
+        return !record.pkgs.isEmpty || !FileManager.default.isWritableFile(atPath: "/Applications")
     }
 
     // MARK: - Apps
@@ -304,10 +307,12 @@ final class SetupCoordinator: ObservableObject {
         settingsApplied = false
         try? "".write(toFile: Self.installLogPath, atomically: true, encoding: .utf8)
 
+        // Catalog first: "already installed" uses its exact bundle names.
+        await catalog.load()
+        installer.sweepStaleWorkFolders()
         for app in selectedApps {
             itemStatuses[app.caskName] = isInstalled(app) ? .skipped : .pending
         }
-        await catalog.load()
 
         var fakeFailuresLeft = DebugState.shared.fakeAppFailures
         var adminApps: [StagedApp] = []
@@ -347,14 +352,17 @@ final class SetupCoordinator: ObservableObject {
                 adminPkgs += staged.pkgs
                 if needAdmin.isEmpty && staged.pkgs.isEmpty {
                     itemStatuses[token] = .succeeded
+                    installer.cleanUp(staged)   // free the disk space now
                     AppLog.info(.install, "Installed \(token) (signed by \(staged.signer ?? "unknown"))")
                 } else {
                     itemStatuses[token] = .waitingForPassword
                     waitingOnAdmin[token] = app
                 }
             } catch let failure as InstallFailure {
+                installer.cleanUp(token: token)
                 fail(app, failure.message)
             } catch {
+                installer.cleanUp(token: token)
                 fail(app, error.localizedDescription)
             }
         }
@@ -385,9 +393,14 @@ final class SetupCoordinator: ObservableObject {
             }
             let script = installer.adminScript(apps: adminApps, pkgs: adminPkgs)
             let ran = await shell.runWithAdmin(script)
-            let ok = Set(shell.output.split(separator: "\n")
-                .filter { $0.hasPrefix("TSE_OK ") }
-                .map { String($0.dropFirst("TSE_OK ".count)) })
+            func tokens(_ prefix: String) -> Set<String> {
+                Set(shell.output.split(separator: "\n")
+                    .filter { $0.hasPrefix(prefix) }
+                    .map { String($0.dropFirst(prefix.count)) })
+            }
+            // An app with several parts (say an app and a package) only counts
+            // as installed if none of its parts failed.
+            let ok = tokens("TSE_OK ").subtracting(tokens("TSE_FAIL "))
 
             for (token, app) in waitingOnAdmin {
                 if ok.contains(token) { itemStatuses[token] = .succeeded }

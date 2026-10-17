@@ -11,6 +11,7 @@ final class SetupCoordinator: ObservableObject {
         case profile
         case apps
         case system
+        case personalise
         case review
         case install
         case done
@@ -19,7 +20,7 @@ final class SetupCoordinator: ObservableObject {
 
         /// Steps shown in the top progress indicator. Welcome and Done sit outside the dotted track.
         static var trackedSteps: [Step] {
-            [.profile, .apps, .system, .review, .install]
+            [.profile, .apps, .system, .personalise, .review, .install]
         }
 
         var trackTitle: String {
@@ -27,6 +28,7 @@ final class SetupCoordinator: ObservableObject {
             case .profile:  "Profile"
             case .apps:     "Apps"
             case .system:   "System"
+            case .personalise: "Personalise"
             case .review:   "Review"
             case .install:  "Install"
             default: ""
@@ -60,6 +62,12 @@ final class SetupCoordinator: ObservableObject {
     @Published var selectedApps: [AppEntry] = []
 
     @Published var settings = SystemPreferences()
+    @Published var personal = Personalisation()
+    @Published var touchIDStatus: TouchIDStatus = .noSensor
+    /// What the Personalise step did (or couldn't do), in plain words.
+    @Published var personalNotes: [String] = []
+    /// Copy of the Dock taken before we changed it, for undo.
+    @Published var dockBackup: URL?
 
     @Published var itemStatuses: [String: ItemStatus] = [:]
     @Published var currentInstallIndex: Int = 0
@@ -127,6 +135,8 @@ final class SetupCoordinator: ObservableObject {
     /// and scans what's already installed so the Apps step has data ready.
     func preflight() async {
         async let catalogLoad: Void = catalog.load()
+        touchIDStatus = TouchIDStatus.detect()
+        personal.touchID = touchIDStatus == .available
         await loadInstalledState()
         await catalogLoad
     }
@@ -163,6 +173,7 @@ final class SetupCoordinator: ObservableObject {
         case .profile: !selectedApps.isEmpty || selectedProfile != nil
         case .apps: !selectedApps.isEmpty
         case .system: true
+        case .personalise: true
         case .review: true
         case .install: installComplete
         case .done: true
@@ -281,6 +292,56 @@ final class SetupCoordinator: ObservableObject {
         }
     }
 
+    // MARK: - Personalise
+
+    /// Where a picked app will live once installed.
+    func bundlePath(for app: AppEntry) -> String? {
+        guard app.kind == .app else { return nil }
+        if let name = catalog.cask(app.caskName)?.installedAppNames.first {
+            return "/Applications/" + name
+        }
+        return nil   // installer-package apps: name unknown until installed
+    }
+
+    /// Picked apps (installed or about to be) that can go in the Dock.
+    private var pickedDockItems: [DockItem] {
+        selectedApps.compactMap { app in
+            guard unavailableReason(app) == nil, let path = bundlePath(for: app) else { return nil }
+            return DockItem(path: path, name: app.displayName, homepageURL: app.homepageURL, token: app.caskName)
+        }
+    }
+
+    /// Rebuilds the Dock plan for a layout. Called when the layout changes.
+    func setDockLayout(_ layout: DockLayout) {
+        personal.dockLayout = layout
+        switch layout {
+        case .keep:
+            personal.dockItems = []
+        case .essentialsAndMine:
+            let apple = AppleApps.essentials
+                .filter { FileManager.default.fileExists(atPath: $0.path) }
+                .map { DockItem(path: $0.path, name: $0.name) }
+            let settings = DockItem(path: AppleApps.systemSettings.path, name: AppleApps.systemSettings.name)
+            personal.dockItems = apple + pickedDockItems.filter { item in !apple.contains { $0.path == item.path } } + [settings]
+        case .onlyMine:
+            personal.dockItems = pickedDockItems
+        }
+    }
+
+    /// Browsers the user could make default: Safari, browsers already on the
+    /// Mac, and browsers they picked to install.
+    var browserChoices: [BrowserChoice] {
+        var choices = [BrowserChoice(name: "Safari", path: "/Applications/Safari.app")]
+        let candidates = Suggestions.categories.flatMap(\.apps).filter { KnownBrowsers.tokens.contains($0.caskName) }
+        for app in candidates {
+            guard let path = bundlePath(for: app), !choices.contains(where: { $0.path == path }) else { continue }
+            if isSelected(app) || FileManager.default.fileExists(atPath: path) {
+                choices.append(BrowserChoice(name: app.displayName, path: path, homepageURL: app.homepageURL, token: app.caskName))
+            }
+        }
+        return choices
+    }
+
     // MARK: - Install
 
     /// Apps that will actually be installed (excluding already-installed).
@@ -309,6 +370,7 @@ final class SetupCoordinator: ObservableObject {
         installComplete = false
         failedItems = []
         failureReasons = [:]
+        personalNotes = []
         settingsApplied = false
         try? "".write(toFile: Self.installLogPath, atomically: true, encoding: .utf8)
 
@@ -392,11 +454,13 @@ final class SetupCoordinator: ObservableObject {
         }
 
         // 3. Everything that needs the password, behind one prompt.
-        if !adminApps.isEmpty || !adminPkgs.isEmpty {
+        let wantsTouchID = personal.touchID && touchIDStatus == .available
+        if !adminApps.isEmpty || !adminPkgs.isEmpty || wantsTouchID {
             if let first = selectedApps.firstIndex(where: { itemStatuses[$0.caskName] == .waitingForPassword }) {
                 currentInstallIndex = first
             }
-            let script = installer.adminScript(apps: adminApps, pkgs: adminPkgs)
+            var script = installer.adminScript(apps: adminApps, pkgs: adminPkgs)
+            if wantsTouchID { script += "\n" + TouchIDForSudo.rootScript }
             let ran = await shell.runWithAdmin(script)
             func tokens(_ prefix: String) -> Set<String> {
                 Set(shell.output.split(separator: "\n")
@@ -407,6 +471,11 @@ final class SetupCoordinator: ObservableObject {
             // as installed if none of its parts failed.
             let ok = tokens("TSE_OK ").subtracting(tokens("TSE_FAIL "))
 
+            if wantsTouchID {
+                personalNotes.append(ok.contains("touchid")
+                    ? "Touch ID now works for sudo in Terminal"
+                    : "Touch ID for sudo wasn't turned on" + (ran ? "" : " (password prompt cancelled)"))
+            }
             for (token, app) in waitingOnAdmin {
                 if ok.contains(token) { itemStatuses[token] = .succeeded }
                 else { fail(app, ran ? "The installer didn't finish" : "Password prompt was cancelled") }
@@ -453,9 +522,51 @@ final class SetupCoordinator: ObservableObject {
         }
         settingsApplied = true
 
+        // 6. Personal touches. The Dock and browser go last so freshly
+        //    installed apps can be included.
+        await applyPersonal()
+
         await loadInstalledState()
         AppLog.info(.install, "Install run complete — \(failedItems.count) failures")
         installComplete = true
+    }
+}
+
+extension SetupCoordinator {
+    func applyPersonal() async {
+        let folders = personal.folders.filter(\.isOn).map { Personalisation.sanitisedFolder($0.path) }.filter { !$0.isEmpty }
+        let created = PersonalSetup.createFolders(folders)
+        if !folders.isEmpty {
+            personalNotes.append(created.isEmpty
+                ? "Your folders were already there"
+                : "Created " + ListFormatter.localizedString(byJoining: created.map { ($0 as NSString).abbreviatingWithTildeInPath }))
+        }
+
+        if personal.screenshotsFolder {
+            let path = personal.screenshotsPath
+            if await PersonalSetup.setScreenshotsFolder(path) {
+                personalNotes.append("Screenshots now save to " + (path as NSString).abbreviatingWithTildeInPath)
+            }
+        }
+
+        if personal.dockLayout != .keep {
+            let paths = personal.dockItems.filter(\.included).map(\.path)
+            try? FileManager.default.createDirectory(at: PersonalSetup.backupsDirectory, withIntermediateDirectories: true)
+            let stamp = ISO8601DateFormatter().string(from: Date()).replacingOccurrences(of: ":", with: "-")
+            let backup = PersonalSetup.backupsDirectory.appending(path: "dock-\(stamp).plist")
+            if await DockWriter.apply(paths: paths, backupTo: backup) {
+                dockBackup = backup
+                let placed = paths.filter { FileManager.default.fileExists(atPath: $0) }.count
+                personalNotes.append("Your Dock now has \(placed) apps")
+            }
+        }
+
+        if let browser = personal.defaultBrowserPath, FileManager.default.fileExists(atPath: browser) {
+            if await PersonalSetup.setDefaultBrowser(browser) {
+                let name = ((browser as NSString).lastPathComponent as NSString).deletingPathExtension
+                personalNotes.append("\(name) is your default browser")
+            }
+        }
     }
 }
 

@@ -26,6 +26,7 @@ struct SetupContainerView: View {
                     case .profile:  ProfileStep()
                     case .apps:     AppsStep()
                     case .system:   SystemStep()
+                    case .personalise: PersonaliseStep()
                     case .review:   ReviewStep()
                     case .install:  InstallStep()
                     case .done:     DoneStep()

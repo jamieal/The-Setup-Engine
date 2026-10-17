@@ -15,6 +15,7 @@ struct ReviewStep: View {
             HStack(alignment: .top, spacing: 18) {
                 appsSummary
                 settingsSummary
+                personalSummary
             }
             .padding(.horizontal, 40)
             .frame(maxWidth: 880)
@@ -76,14 +77,16 @@ struct ReviewStep: View {
         let pkgApps = coordinator.appsToInstall.filter { coordinator.needsPassword($0) }
         let needsHomebrew = !HomebrewSupport.isInstalled
             && coordinator.appsToInstall.contains { coordinator.usesHomebrew($0) }
-        let reasons = (pkgApps.isEmpty ? [] : [ListFormatter.localizedString(byJoining: pkgApps.map(\.displayName))])
-            + (needsHomebrew ? ["Homebrew, which some of your picks need"] : [])
+        let touchID = coordinator.personal.touchID && coordinator.touchIDStatus == .available
+        let reasons = (pkgApps.isEmpty ? [] : ["install " + ListFormatter.localizedString(byJoining: pkgApps.map(\.displayName))])
+            + (needsHomebrew ? ["install Homebrew, which some of your picks need"] : [])
+            + (touchID ? ["turn on Touch ID for sudo"] : [])
 
         if !reasons.isEmpty {
             HStack(alignment: .firstTextBaseline, spacing: 6) {
                 Image(systemName: "lock.fill")
                     .foregroundStyle(.tint)
-                Text("You'll be asked for your Mac's password once, to install ")
+                Text("You'll be asked for your Mac's password once, to ")
                     + Text(reasons.joined(separator: " and ")).fontWeight(.semibold)
                     + Text(".")
             }
@@ -181,6 +184,25 @@ struct ReviewStep: View {
         }
     }
 
+    private var personalSummary: some View {
+        let p = coordinator.personal
+        let folders = p.folders.filter(\.isOn).map { "~/" + $0.path }
+        let dockCount = p.dockItems.filter(\.included).count
+        let browser = p.defaultBrowserPath.map { (($0 as NSString).lastPathComponent as NSString).deletingPathExtension }
+        let touchID = coordinator.touchIDStatus == .alreadyOn ? "Already on"
+            : (p.touchID && coordinator.touchIDStatus == .available ? "Turn on" : "No change")
+
+        return SummaryCard(symbol: "person.crop.square", title: "Personal", tint: .purple) {
+            VStack(alignment: .leading, spacing: 6) {
+                summaryRow("Dock", p.dockLayout == .keep ? "No change" : "\(dockCount) apps")
+                summaryRow("Folders", folders.isEmpty ? "None" : folders.joined(separator: ", "))
+                summaryRow("Screenshots", p.screenshotsFolder ? (p.screenshotsPath as NSString).abbreviatingWithTildeInPath : "Desktop")
+                summaryRow("Browser", browser ?? "No change")
+                summaryRow("Touch ID for sudo", touchID)
+            }
+        }
+    }
+
     private var finderSummary: String {
         var bits: [String] = []
         if coordinator.settings.showPathBar { bits.append("path bar") }
@@ -193,9 +215,12 @@ struct ReviewStep: View {
             Text(label)
                 .font(.caption)
                 .foregroundStyle(.secondary)
-            Spacer()
+            Spacer(minLength: 8)
             Text(value)
                 .font(.caption.weight(.medium))
+                .lineLimit(1)
+                .truncationMode(.middle)
+                .help(value)
         }
     }
 
@@ -249,7 +274,7 @@ private struct SummaryCard<Content: View>: View {
 // MARK: - Flow layout
 
 /// Wraps children onto multiple lines.
-private struct FlowLayout: Layout {
+struct FlowLayout: Layout {
     var spacing: CGFloat = 6
 
     func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {

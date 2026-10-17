@@ -21,6 +21,7 @@ struct DebugCommands: Commands {
                 Button("Profile")   { state.requestedJumpStep = .profile }
                 Button("Apps")      { state.requestedJumpStep = .apps }
                 Button("System")    { state.requestedJumpStep = .system }
+                Button("Personalise") { state.requestedJumpStep = .personalise }
                 Button("Review")    { state.requestedJumpStep = .review }
                 Button("Install")   { state.requestedJumpStep = .install }
                 Button("Done")      { state.requestedJumpStep = .done }

@@ -7,6 +7,17 @@ import AppKit
 enum WindowSnapshot {
     @discardableResult
     static func saveMainWindowToDesktop() -> URL? {
+        let stamp = ISO8601DateFormatter().string(from: Date())
+            .replacingOccurrences(of: ":", with: "-")
+        let url = FileManager.default
+            .urls(for: .desktopDirectory, in: .userDomainMask).first!
+            .appending(path: "TheSetupEngine-Window-\(stamp).png")
+        return save(to: url)
+    }
+
+    /// Renders the main window into a PNG at `url`.
+    @discardableResult
+    static func save(to url: URL) -> URL? {
         guard let window = NSApp.keyWindow ?? NSApp.mainWindow ?? NSApp.windows.first(where: { $0.isVisible }),
               let view = window.contentView
         else {
@@ -26,11 +37,6 @@ enum WindowSnapshot {
             return nil
         }
 
-        let stamp = ISO8601DateFormatter().string(from: Date())
-            .replacingOccurrences(of: ":", with: "-")
-        let url = FileManager.default
-            .urls(for: .desktopDirectory, in: .userDomainMask).first!
-            .appending(path: "TheSetupEngine-Window-\(stamp).png")
 
         do {
             try pngData.write(to: url)

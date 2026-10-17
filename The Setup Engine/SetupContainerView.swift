@@ -1,4 +1,6 @@
+import Combine
 import SwiftUI
+import UniformTypeIdentifiers
 
 struct SetupContainerView: View {
     @StateObject private var coordinator = SetupCoordinator()
@@ -47,6 +49,9 @@ struct SetupContainerView: View {
         .environmentObject(coordinator)
         .task {
             await coordinator.preflight()
+            #if DEBUG
+            await DebugAutopilot.run(coordinator)
+            #endif
         }
         .onChange(of: coordinator.currentStep) {
             recipes.acceptsRecipes = coordinator.currentStep.rawValue < SetupCoordinator.Step.install.rawValue

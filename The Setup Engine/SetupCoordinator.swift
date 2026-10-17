@@ -440,10 +440,11 @@ final class SetupCoordinator: ObservableObject {
             let gate = ProgressGate()
             itemStatuses[token] = .downloading(0)
             do {
-                let staged = try await installer.stage(cask) { [weak self] p in
+                // The coordinator lives for the app's lifetime; a strong capture is fine.
+                let staged = try await installer.stage(cask) { p in
                     guard gate.shouldReport(p) else { return }
                     Task { @MainActor in
-                        guard let self, case .downloading = self.itemStatuses[token] else { return }
+                        guard case .downloading = self.itemStatuses[token] else { return }
                         self.itemStatuses[token] = p >= 1 ? .verifying : .downloading(p)
                     }
                 }

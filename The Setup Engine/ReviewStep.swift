@@ -12,21 +12,26 @@ struct ReviewStep: View {
             )
             .padding(.top, 28)
 
-            HStack(alignment: .top, spacing: 18) {
-                appsSummary
-                settingsSummary
-                personalSummary
+            // Three cards plus heads-ups can outgrow the window; scroll them.
+            ScrollView {
+                VStack(spacing: 18) {
+                    HStack(alignment: .top, spacing: 18) {
+                        appsSummary
+                        settingsSummary
+                        personalSummary
+                    }
+                    .padding(.horizontal, 40)
+                    .frame(maxWidth: 880)
+
+                    pricingHeadsUp
+
+                    passwordHeadsUp
+
+                    estimateLine
+                }
+                .padding(.bottom, 16)
+                .frame(maxWidth: .infinity)
             }
-            .padding(.horizontal, 40)
-            .frame(maxWidth: 880)
-
-            pricingHeadsUp
-
-            passwordHeadsUp
-
-            estimateLine
-
-            Spacer(minLength: 0)
         }
     }
 

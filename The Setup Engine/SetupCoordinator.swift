@@ -215,7 +215,12 @@ final class SetupCoordinator: ObservableObject {
 
     /// True if the app or tool is already on this Mac.
     func isInstalled(_ app: AppEntry) -> Bool {
-        if app.kind == .commandLine { return installedFormulae.contains(app.caskName) }
+        if app.kind == .commandLine {
+            // "python" installs as "python@3.15", so match versioned names too.
+            return installedFormulae.contains(app.caskName)
+                || installedFormulae.contains { $0.hasPrefix(app.caskName + "@") }
+                || installedCasks.contains(app.caskName)
+        }
         if installedCasks.contains(app.caskName) { return true }
 
         // Best signal: the exact bundle names Homebrew's catalog says this app installs.
@@ -424,7 +429,8 @@ final class SetupCoordinator: ObservableObject {
                 guard status == .pending || status == .waitingForPassword else { continue }
                 currentInstallIndex = i
                 itemStatuses[tool.caskName] = .installing
-                guard let command = HomebrewSupport.installCommand(tool.caskName, cask: tool.kind == .app) else {
+                let isCask = tool.kind == .app || Suggestions.commandLineCasks.contains(tool.caskName)
+                guard let command = HomebrewSupport.installCommand(tool.caskName, cask: isCask) else {
                     fail(tool, "Not a valid Homebrew formula name")
                     continue
                 }

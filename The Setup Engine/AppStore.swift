@@ -96,6 +96,9 @@ struct AppEntry: Identifiable, Codable, Equatable {
         "warp",
         "obsidian",
         "docker-desktop", // free for personal/small biz, paid for orgs >250 employees
+        "claude",
+        "chatgpt",
+        "cursor",
     ]
 }
 
@@ -129,6 +132,25 @@ enum Suggestions {
     /// re-checks every curated app's download link.
     static let homebrewOnly: Set<String> = ["blender", "warp"]
 
+    /// Command-line tools Homebrew ships as casks rather than formulae.
+    static let commandLineCasks: Set<String> = ["claude-code"]
+
+    /// Command-line tools, installed with Homebrew.
+    static let commandLineTools: [AppEntry] = [
+        AppEntry(caskName: "git", displayName: "Git", homepageURL: "https://git-scm.com", desc: "Version control", kind: .commandLine),
+        AppEntry(caskName: "gh", displayName: "GitHub CLI", homepageURL: "https://cli.github.com", desc: "GitHub from the terminal", kind: .commandLine),
+        AppEntry(caskName: "node", displayName: "Node.js", homepageURL: "https://nodejs.org", desc: "JavaScript runtime", kind: .commandLine),
+        AppEntry(caskName: "python", displayName: "Python", homepageURL: "https://www.python.org", desc: "Python 3, latest", kind: .commandLine),
+        AppEntry(caskName: "jq", displayName: "jq", homepageURL: "https://jqlang.github.io/jq", desc: "JSON processor", kind: .commandLine),
+        AppEntry(caskName: "wget", displayName: "Wget", homepageURL: "https://www.gnu.org/software/wget", desc: "File downloader", kind: .commandLine),
+        AppEntry(caskName: "mas", displayName: "mas", homepageURL: "https://github.com/mas-cli/mas", desc: "Mac App Store from the terminal", kind: .commandLine),
+        AppEntry(caskName: "claude-code", displayName: "Claude Code", homepageURL: "https://claude.com/product/claude-code", desc: "AI coding assistant", kind: .commandLine),
+    ]
+
+    private static func tool(_ token: String) -> AppEntry {
+        commandLineTools.first { $0.caskName == token }!
+    }
+
     static let profiles: [SetupProfile] = [
         SetupProfile(
             name: "Developer",
@@ -141,6 +163,9 @@ enum Suggestions {
                 AppEntry(caskName: "postman", displayName: "Postman", homepageURL: "https://www.postman.com", desc: "API development"),
                 AppEntry(caskName: "github", displayName: "GitHub Desktop", homepageURL: "https://desktop.github.com", desc: "Git client"),
                 AppEntry(caskName: "sourcetree", displayName: "Sourcetree", homepageURL: "https://www.sourcetreeapp.com", desc: "Git GUI"),
+                tool("git"),
+                tool("gh"),
+                tool("node"),
             ]
         ),
         SetupProfile(
@@ -206,6 +231,14 @@ enum Suggestions {
             AppEntry(caskName: "alfred", displayName: "Alfred", homepageURL: "https://www.alfredapp.com", desc: "Launcher & productivity"),
             AppEntry(caskName: "raycast", displayName: "Raycast", homepageURL: "https://www.raycast.com", desc: "Launcher & extensions"),
         ]),
+        AppCategory(name: "AI", icon: "sparkles", apps: [
+            AppEntry(caskName: "claude", displayName: "Claude", homepageURL: "https://claude.com/download", desc: "Anthropic's AI assistant"),
+            AppEntry(caskName: "chatgpt", displayName: "ChatGPT", homepageURL: "https://chatgpt.com", desc: "OpenAI's AI assistant"),
+            AppEntry(caskName: "ollama-app", displayName: "Ollama", homepageURL: "https://ollama.com", desc: "Run AI models locally"),
+            AppEntry(caskName: "lm-studio", displayName: "LM Studio", homepageURL: "https://lmstudio.ai", desc: "Download and run local models"),
+            AppEntry(caskName: "cursor", displayName: "Cursor", homepageURL: "https://www.cursor.com", desc: "AI code editor"),
+            AppEntry(caskName: "jan", displayName: "Jan", homepageURL: "https://jan.ai", desc: "Offline AI chat"),
+        ]),
         AppCategory(name: "Communication", icon: "bubble.left.and.bubble.right.fill", apps: [
             AppEntry(caskName: "slack", displayName: "Slack", homepageURL: "https://slack.com", desc: "Team messaging"),
             AppEntry(caskName: "zoom", displayName: "Zoom", homepageURL: "https://zoom.us", desc: "Video conferencing"),
@@ -228,5 +261,6 @@ enum Suggestions {
             AppEntry(caskName: "obs", displayName: "OBS Studio", homepageURL: "https://obsproject.com", desc: "Streaming & recording"),
             AppEntry(caskName: "handbrake-app", displayName: "HandBrake", homepageURL: "https://handbrake.fr", desc: "Video transcoder"),
         ]),
+        AppCategory(name: "Command line", icon: "terminal.fill", apps: commandLineTools),
     ]
 }

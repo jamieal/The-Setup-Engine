@@ -302,6 +302,21 @@ final class CaskCatalog: ObservableObject {
         return resolved
     }
 
+    /// Bundle name ("Slack.app") → catalog token, for recognising the apps on
+    /// a Mac. Prefers the main token over variants like "google-chrome@beta".
+    func tokensByBundleName() -> [String: String] {
+        var out: [String: String] = [:]
+        for r in records.values where r.isInstallable && !r.deprecated && !r.disabled {
+            for app in r.apps {
+                if let existing = out[app.target], !existing.contains("@"), r.token.contains("@") || existing.count <= r.token.count {
+                    continue
+                }
+                out[app.target] = r.token
+            }
+        }
+        return out
+    }
+
     /// Ranked search over every installable, non-deprecated app in the catalog.
     func search(_ query: String, limit: Int = 20) -> [ResolvedCask] {
         let q = query.lowercased().trimmingCharacters(in: .whitespaces)

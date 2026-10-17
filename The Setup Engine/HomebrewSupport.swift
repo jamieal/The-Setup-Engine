@@ -62,6 +62,14 @@ nonisolated enum HomebrewSupport {
             .split(separator: "\n").map(String.init))
     }
 
+    /// Formulae the person asked for (not ones pulled in as dependencies).
+    static func formulaeInstalledOnRequest() async -> Set<String> {
+        guard let brew = MacEnvironment.homebrewExecutable else { return [] }
+        let result = await DirectInstaller.run(brew, ["leaves", "--installed-on-request"])
+        return Set(String(decoding: result.stdout, as: UTF8.self)
+            .split(separator: "\n").map(String.init))
+    }
+
     /// Cask tokens Homebrew has installed, for people who used Homebrew before.
     static func installedCasks() async -> Set<String> {
         guard let brew = MacEnvironment.homebrewExecutable else { return [] }

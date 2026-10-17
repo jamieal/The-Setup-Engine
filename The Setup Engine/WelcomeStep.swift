@@ -42,7 +42,18 @@ struct WelcomeStep: View {
             }
             .buttonStyle(.borderedProminent)
             .controlSize(.extraLarge)
-            .padding(.bottom, 36)
+            .padding(.bottom, 12)
+
+            HStack(spacing: 18) {
+                Button("Use a recipe…") { RecipeInbox.shared.chooseAndOpen() }
+                    .help("Set up this Mac from a .setuprecipe file")
+                Text("·").foregroundStyle(.tertiary)
+                Button("Save this Mac as a recipe…") { RecipeInbox.shared.exportThisMacRequested = true }
+                    .help("Record this Mac's apps, Dock and settings to set up your next Mac the same way")
+            }
+            .buttonStyle(.link)
+            .font(.callout)
+            .padding(.bottom, 28)
         }
         .padding(.horizontal, 40)
     }

@@ -343,6 +343,8 @@ final class SetupCoordinator: ObservableObject {
             personal.dockItems = apple + pickedDockItems.filter { item in !apple.contains { $0.path == item.path } } + [settings]
         case .onlyMine:
             personal.dockItems = pickedDockItems
+        case .saved:
+            personal.dockItems = personal.savedDock ?? []
         }
     }
 

@@ -36,7 +36,7 @@ struct PersonaliseStep: View {
         .task { await wallpapers.load() }
         .onAppear {
             // Picks may have changed on the Apps step since the Dock was planned.
-            if coordinator.personal.dockLayout != .keep {
+            if coordinator.personal.dockLayout != .keep && coordinator.personal.dockLayout != .saved {
                 coordinator.setDockLayout(coordinator.personal.dockLayout)
             }
             if let path = coordinator.personal.defaultBrowserPath,
@@ -190,7 +190,7 @@ struct PersonaliseStep: View {
                 get: { coordinator.personal.dockLayout },
                 set: { coordinator.setDockLayout($0) }
             )) {
-                ForEach(DockLayout.allCases) { layout in
+                ForEach(DockLayout.allCases.filter { $0 != .saved || coordinator.personal.savedDock != nil }) { layout in
                     Text(layout.label).tag(layout)
                 }
             }

@@ -100,6 +100,10 @@ struct DoneStep: View {
             }
 
             HStack(spacing: 12) {
+                Button("Save as recipe…") {
+                    RecipeSaver.save(coordinator.recipeFromChoices(name: Host.current().localizedName ?? "My setup"))
+                }
+                .help("Set up your next Mac the same way, or share your setup")
                 if let receipt = coordinator.receiptURL {
                     Button("Open receipt") { NSWorkspace.shared.open(receipt) }
                     Button("Show in Finder") { NSWorkspace.shared.activateFileViewerSelecting([receipt]) }

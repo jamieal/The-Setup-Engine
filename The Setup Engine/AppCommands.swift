@@ -15,8 +15,12 @@ struct AppCommands: Commands {
             }
         }
 
-        // File menu — diagnostic actions live here for visibility.
+        // File menu — recipes, then diagnostic actions.
         CommandGroup(after: .newItem) {
+            Button("Open Recipe…") { RecipeInbox.shared.chooseAndOpen() }
+                .keyboardShortcut("o", modifiers: .command)
+            Button("Save This Mac as a Recipe…") { RecipeInbox.shared.exportThisMacRequested = true }
+
             Divider()
             Button("Collect Diagnostic Logs…") {
                 collectAndRevealLogs()

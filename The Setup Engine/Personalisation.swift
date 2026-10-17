@@ -80,6 +80,7 @@ enum DockLayout: String, CaseIterable, Identifiable {
     case keep
     case essentialsAndMine
     case onlyMine
+    case saved
 
     var id: String { rawValue }
 
@@ -88,6 +89,7 @@ enum DockLayout: String, CaseIterable, Identifiable {
         case .keep:              "Keep as is"
         case .essentialsAndMine: "Essentials + my apps"
         case .onlyMine:          "Only my apps"
+        case .saved:             "From recipe"
         }
     }
 
@@ -96,6 +98,7 @@ enum DockLayout: String, CaseIterable, Identifiable {
         case .keep:              "Leave the Dock exactly as it is."
         case .essentialsAndMine: "Safari, Mail, Messages, Calendar and System Settings, then the apps you picked."
         case .onlyMine:          "Just the apps you picked. Finder and the Trash always stay."
+        case .saved:             "The Dock from your recipe, in the same order."
         }
     }
 }
@@ -187,6 +190,8 @@ struct Personalisation {
     var dockLayout: DockLayout = .keep
     /// The Dock as it will be applied (only used when `dockLayout != .keep`).
     var dockItems: [DockItem] = []
+    /// A Dock loaded from a recipe, offered as the "From recipe" layout.
+    var savedDock: [DockItem]?
 
     /// Path of the browser to make default, or nil to leave it alone.
     var defaultBrowserPath: String?

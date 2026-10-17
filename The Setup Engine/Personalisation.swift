@@ -191,6 +191,8 @@ struct Personalisation {
     /// Path of the browser to make default, or nil to leave it alone.
     var defaultBrowserPath: String?
 
+    var wallpaper: WallpaperChoice = .keep
+
     var screenshotsPath: String {
         NSHomeDirectory() + "/Pictures/" + Self.sanitisedFolder(screenshotsFolderName, fallback: "Screenshots")
     }
@@ -207,7 +209,7 @@ struct Personalisation {
 
     var isEmpty: Bool {
         !touchID && !folders.contains(where: \.isOn) && !screenshotsFolder
-            && dockLayout == .keep && defaultBrowserPath == nil
+            && dockLayout == .keep && defaultBrowserPath == nil && wallpaper == .keep
     }
 }
 
@@ -215,9 +217,11 @@ struct Personalisation {
 /// Touch ID goes in the root batch; Dock and browser are applied after
 /// apps are installed so the new apps can be included.
 nonisolated enum PersonalSetup {
+    /// ~/Documents/The Setup Engine: the receipt and the old Dock live here, so
+    /// they stay after the app removes itself.
     static var backupsDirectory: URL {
-        AppLog.logFileURL.deletingLastPathComponent().deletingLastPathComponent()
-            .appending(path: "Backups", directoryHint: .isDirectory)
+        FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+            .appending(path: "The Setup Engine", directoryHint: .isDirectory)
     }
 
     static func createFolders(_ relativePaths: [String]) -> [String] {

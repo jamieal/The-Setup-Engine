@@ -69,6 +69,24 @@ final class SetupCoordinator: ObservableObject {
     /// Copy of the Dock taken before we changed it, for undo.
     @Published var dockBackup: URL?
 
+    // Receipt and undo
+    @Published var settingsBefore: [DefaultsValue] = []
+    @Published var settingsAfter: [DefaultsValue] = []
+    @Published var wallpaperBefore: [String: URL] = [:]
+    @Published var wallpaperChanged = false
+    @Published var receiptURL: URL?
+    @Published var changesUndone = false
+    /// Version, signer and route for each app installed this run.
+    var installedDetails: [String: SetupReceipt.InstalledApp] = [:]
+    /// True if this run installed Homebrew.
+    @Published var installedHomebrew = false
+
+    /// Anything the finish screen can offer to undo.
+    var hasUndoableChanges: Bool {
+        !changesUndone && (zip(settingsBefore, settingsAfter).contains { $0 != $1 }
+            || dockBackup != nil || wallpaperChanged)
+    }
+
     @Published var itemStatuses: [String: ItemStatus] = [:]
     @Published var currentInstallIndex: Int = 0
     @Published var settingsApplied: Bool = false
@@ -371,6 +389,10 @@ final class SetupCoordinator: ObservableObject {
         failedItems = []
         failureReasons = [:]
         personalNotes = []
+        installedDetails = [:]
+        dockBackup = nil
+        wallpaperChanged = false
+        changesUndone = false
         settingsApplied = false
         try? "".write(toFile: Self.installLogPath, atomically: true, encoding: .utf8)
 
@@ -420,10 +442,14 @@ final class SetupCoordinator: ObservableObject {
                 if needAdmin.isEmpty && staged.pkgs.isEmpty {
                     itemStatuses[token] = .succeeded
                     installer.cleanUp(staged)   // free the disk space now
+                    installedDetails[token] = .init(name: app.displayName, version: cask.record.version,
+                                                    signer: staged.signer, via: "downloaded from its maker")
                     AppLog.info(.install, "Installed \(token) (signed by \(staged.signer ?? "unknown"))")
                 } else {
                     itemStatuses[token] = .waitingForPassword
                     waitingOnAdmin[token] = app
+                    installedDetails[token] = .init(name: app.displayName, version: cask.record.version,
+                                                    signer: staged.signer, via: "downloaded from its maker, installed with Apple's installer")
                 }
             } catch let failure as InstallFailure {
                 installer.cleanUp(token: token)
@@ -482,6 +508,7 @@ final class SetupCoordinator: ObservableObject {
             }
             if adminPkgs.contains(where: { $0.token == "homebrew" }) {
                 homebrewReady = ok.contains("homebrew") && HomebrewSupport.isInstalled
+                installedHomebrew = homebrewReady
                 if homebrewReady {
                     AppLog.info(.homebrew, "Homebrew installed")
                 } else {
@@ -507,14 +534,19 @@ final class SetupCoordinator: ObservableObject {
                     "{ echo '=== \(tool.caskName) ==='; \(command); } 2>&1 | tee -a \(DirectInstaller.quote(Self.installLogPath)); exit ${pipestatus[1]}",
                     clearOutput: false
                 )
-                if success { itemStatuses[tool.caskName] = .succeeded }
+                if success {
+                    itemStatuses[tool.caskName] = .succeeded
+                    installedDetails[tool.caskName] = .init(name: tool.displayName, version: nil, signer: nil, via: "installed with Homebrew")
+                }
                 else { fail(tool, "Homebrew couldn't install it — see the install log") }
             }
         }
 
         installer.cleanUpAll()
 
-        // 5. System preferences
+        // 5. System preferences. Snapshot first, for the receipt and undo.
+        settingsBefore = await SettingsSnapshot.capture()
+        wallpaperBefore = WallpaperSnapshot.capture()
         let script = settings.commandLine()
         if !script.isEmpty {
             AppLog.info(.settings, "Applying system preferences")
@@ -525,6 +557,9 @@ final class SetupCoordinator: ObservableObject {
         // 6. Personal touches. The Dock and browser go last so freshly
         //    installed apps can be included.
         await applyPersonal()
+
+        settingsAfter = await SettingsSnapshot.capture()
+        receiptURL = makeReceipt().save()
 
         await loadInstalledState()
         AppLog.info(.install, "Install run complete — \(failedItems.count) failures")
@@ -553,12 +588,28 @@ extension SetupCoordinator {
             let paths = personal.dockItems.filter(\.included).map(\.path)
             try? FileManager.default.createDirectory(at: PersonalSetup.backupsDirectory, withIntermediateDirectories: true)
             let stamp = ISO8601DateFormatter().string(from: Date()).replacingOccurrences(of: ":", with: "-")
-            let backup = PersonalSetup.backupsDirectory.appending(path: "dock-\(stamp).plist")
+            let backup = PersonalSetup.backupsDirectory.appending(path: "Dock before \(stamp).plist")
             if await DockWriter.apply(paths: paths, backupTo: backup) {
                 dockBackup = backup
                 let placed = paths.filter { FileManager.default.fileExists(atPath: $0) }.count
                 personalNotes.append("Your Dock now has \(placed) apps")
             }
+        }
+
+        switch personal.wallpaper {
+        case .keep:
+            break
+        case .collection(let photo):
+            do {
+                let file = try await WallpaperSetter.download(photo)
+                wallpaperChanged = WallpaperSetter.set(file)
+                if wallpaperChanged { personalNotes.append("Wallpaper set to \(photo.title)") }
+            } catch {
+                personalNotes.append("The wallpaper couldn't be downloaded")
+            }
+        case .file(let url):
+            wallpaperChanged = WallpaperSetter.set(url)
+            if wallpaperChanged { personalNotes.append("Wallpaper set to \(url.deletingPathExtension().lastPathComponent)") }
         }
 
         if let browser = personal.defaultBrowserPath, FileManager.default.fileExists(atPath: browser) {
@@ -567,6 +618,40 @@ extension SetupCoordinator {
                 personalNotes.append("\(name) is your default browser")
             }
         }
+    }
+}
+
+extension SetupCoordinator {
+    func makeReceipt() -> SetupReceipt {
+        var r = SetupReceipt()
+        r.installed = selectedApps.compactMap { app in
+            itemStatuses[app.caskName] == .succeeded ? installedDetails[app.caskName] : nil
+        }
+        if installedHomebrew {
+            r.installed.append(.init(name: "Homebrew", version: nil, signer: "Developer ID Installer (\(HomebrewSupport.installerTeamID))",
+                                     via: "official installer, needed for command-line tools"))
+        }
+        r.skipped = selectedApps.filter { itemStatuses[$0.caskName] == .skipped }.map(\.displayName)
+        r.failed = selectedApps.compactMap { app in failureReasons[app.caskName].map { (app.displayName, $0) } }
+        r.settingsBefore = settingsBefore
+        r.settingsAfter = settingsAfter
+        if let dockBackup {
+            r.dockBefore = SettingsSnapshot.dockNames(in: dockBackup)
+            r.dockAfter = personal.dockItems.filter { $0.included && FileManager.default.fileExists(atPath: $0.path) }.map(\.name)
+            r.dockBackup = dockBackup
+        }
+        r.personalNotes = personalNotes
+        return r
+    }
+
+    /// Puts settings, the Dock and the wallpaper back how they were.
+    func undoChanges() async {
+        let changed = zip(settingsBefore, settingsAfter).filter { $0 != $1 }.map(\.0)
+        await SettingsSnapshot.restore(changed)
+        if let dockBackup { _ = await DockWriter.restore(from: dockBackup) }
+        if wallpaperChanged { WallpaperSnapshot.restore(wallpaperBefore) }
+        changesUndone = true
+        AppLog.info(.settings, "Undid this run's settings, Dock and wallpaper changes")
     }
 }
 

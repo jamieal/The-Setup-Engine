@@ -8,7 +8,7 @@ A guided macOS setup workflow built with SwiftUI. Installs apps straight from th
 
 Some days I wipe my Mac multiple times. Others, not so much. Either way, I kept finding myself doing the same thing over and over — downloading the same apps I use daily, toggling the same preferences. I wanted a Mac version of [Ninite](https://ninite.com/).
 
-What started as a shell script is now this SwiftUI app that walks anyone through the same five steps without ever touching a terminal: **Profile**, **Apps**, **System**, **Review**, **Install**.
+What started as a shell script is now this SwiftUI app that walks anyone through six steps without ever touching a terminal: **Profile**, **Apps**, **System**, **Personalise**, **Review**, **Install**. Then it hands you a receipt of everything it changed, lets you undo the settings, and removes itself. Set up once, then gone.
 
 If you're setting up a brand new Mac — or wipe yours as often as I do — I hope it cuts the mundane out of it.
 
@@ -36,15 +36,41 @@ The full catalogue, grouped by category. Already-installed apps are greyed out w
 
 Dock position + auto-hide, system appearance (Light / Dark / Auto), Finder path bar + hidden files, 24-hour time. Everything here is a `defaults write` + `killall Dock`/`killall Finder` under the hood — non-destructive and trivially reversible from System Settings.
 
-### 4. Review — confirm everything
+### 4. Personalise — make it yours
+
+The small things that make a Mac feel like yours. Nothing changes until you press Begin Setup.
+
+- **Dock**: "Do you want these in your Dock?" Keep it as is, essentials plus your apps, or only your apps, with a live preview. Untick or reorder anything. Your old Dock is saved first.
+- **Wallpaper**: pick from the published collection, or choose your own photo.
+- **Starting folders**: `~/GitHub` and `~/dev/src` pre-ticked, plus any you add.
+- **Screenshots folder**: `~/Pictures/Screenshots` instead of the Desktop.
+- **Default browser**: Safari, a browser you already have, or one you're installing. macOS asks you to confirm.
+- **Touch ID for sudo**: offered only if the Mac has Touch ID and a fingerprint is enrolled. Written to `/etc/pam.d/sudo_local`, which survives macOS updates.
+
+### 5. Review — confirm everything
 
 ![Review step](screenshots/composite/07-review.png)
 
 A summary of what's about to happen — apps to install, settings to change, and a heads-up if anything in the queue is paid/freemium. Hit **Begin Setup** to actually run it, or **Back** to change anything.
 
-### 5. Install
+### 6. Install
 
 Staged progress with a clean "what's happening now" tile: downloading, checking with Apple, installing. Apps that use Apple's installer (Zoom, Microsoft Teams) are installed together behind one password prompt at the end. No raw terminal output — that goes to a log file you can pull up via **File → Collect Diagnostic Logs… (⌘⇧L)**.
+
+### Finish — receipt, undo, and gone
+
+The finish screen lists what changed and saves a receipt to `~/Documents/The Setup Engine/`: every app with its version and who signed it, every setting with its old and new value, and the Dock before and after. **Undo settings changes** puts the settings, Dock and wallpaper back. **Finish and remove The Setup Engine** deletes the app's caches, logs and preferences and moves the app to the Trash. Your apps, settings and receipt stay.
+
+## Wallpaper collection
+
+The app shows photos from `wallpapers.json` on this repo's `wallpapers` GitHub release. To publish or update the collection from a folder of photos (JPEG, HEIC or PNG, ideally 5K):
+
+```bash
+scripts/publish-wallpapers.sh ~/Pictures/Wallpaper\ picks
+DRY_RUN=1 scripts/publish-wallpapers.sh <folder>   # preview without uploading
+```
+
+It makes thumbnails, writes titles from the file names, adds SHA-256 checksums, and uploads everything with `gh`. Until a collection is published, the app just offers "Choose your own photo".
 
 ## Diagnostics
 
@@ -103,7 +129,10 @@ Single-target SwiftUI app. No Swift Package dependencies.
 
 - **`SetupCoordinator`** — `ObservableObject` state machine. One step enum, one navigation method, all state lives here.
 - **`SetupContainerView`** — header (progress track), body (current step), footer (Back / Continue), ⌘K overlay, floating ? button.
-- **Step views** — `WelcomeStep`, `ProfileStep`, `AppsStep`, `SystemStep`, `ReviewStep`, `InstallStep`, `DoneStep`.
+- **Step views** — `WelcomeStep`, `ProfileStep`, `AppsStep`, `SystemStep`, `PersonaliseStep`, `ReviewStep`, `InstallStep`, `DoneStep`.
+- **`Personalisation`** — Dock, folders, screenshots, browser and Touch ID; `Wallpaper` for the collection.
+- **`Receipt`** — settings snapshots (old → new), undo, and the Markdown receipt.
+- **`SelfRemoval`** — deletes the app's traces and moves it to the Trash.
 - **`CaskCatalog`** — loads, caches and searches Homebrew's app catalog; resolves each app's download for this Mac's chip and macOS.
 - **`DirectInstaller`** — download → checksum → unpack → Gatekeeper → move into Applications.
 - **`HomebrewSupport`** — installs Homebrew (official .pkg), formulae, and the few Homebrew-only apps.

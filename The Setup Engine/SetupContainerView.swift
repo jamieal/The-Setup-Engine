@@ -106,7 +106,8 @@ struct SetupContainerView: View {
 
     @ViewBuilder
     private var footer: some View {
-        if coordinator.currentStep != .welcome {
+        // Welcome and Done carry their own buttons.
+        if coordinator.currentStep != .welcome && coordinator.currentStep != .done {
             HStack {
                 if coordinator.canGoBack {
                     Button("Back") { coordinator.back() }

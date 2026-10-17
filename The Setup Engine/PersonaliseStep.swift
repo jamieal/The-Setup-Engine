@@ -1,11 +1,13 @@
 import AppKit
 import SwiftUI
+import UniformTypeIdentifiers
 
 /// The small things that make a Mac feel like yours (#13, #17): Touch ID for
 /// sudo, starting folders, a screenshots folder, the Dock and the default browser.
 struct PersonaliseStep: View {
     @EnvironmentObject var coordinator: SetupCoordinator
     @State private var newFolder = ""
+    @ObservedObject private var wallpapers = WallpaperCollection.shared
 
     var body: some View {
         VStack(spacing: 24) {
@@ -19,6 +21,7 @@ struct PersonaliseStep: View {
             ScrollView {
                 VStack(spacing: 14) {
                     dockCard
+                    wallpaperCard
                     foldersCard
                     screenshotsCard
                     browserCard
@@ -30,6 +33,7 @@ struct PersonaliseStep: View {
             }
             .frame(maxWidth: .infinity)
         }
+        .task { await wallpapers.load() }
         .onAppear {
             // Picks may have changed on the Apps step since the Dock was planned.
             if coordinator.personal.dockLayout != .keep {
@@ -248,6 +252,81 @@ struct PersonaliseStep: View {
         guard coordinator.personal.dockItems.indices.contains(target) else { return }
         withAnimation(.easeInOut(duration: 0.15)) {
             coordinator.personal.dockItems.swapAt(index, target)
+        }
+    }
+
+    // MARK: - Wallpaper
+
+    private var wallpaperCard: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            cardHeader(symbol: "photo.on.rectangle", title: "Wallpaper",
+                       description: coordinator.personal.wallpaper == .keep
+                           ? "Keep your current wallpaper, or pick a new one."
+                           : "Set to \(coordinator.personal.wallpaper.label) on every screen.")
+
+            if !wallpapers.photos.isEmpty {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 10) {
+                        ForEach(wallpapers.photos) { photo in
+                            wallpaperThumb(photo)
+                        }
+                    }
+                    .padding(2)
+                }
+            }
+
+            HStack(spacing: 10) {
+                Button("Choose your own photo…", action: chooseOwnPhoto)
+                if coordinator.personal.wallpaper != .keep {
+                    Button("Keep current wallpaper") { coordinator.personal.wallpaper = .keep }
+                        .buttonStyle(.link)
+                }
+            }
+        }
+        .padding(16)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 14))
+    }
+
+    private func wallpaperThumb(_ photo: WallpaperPhoto) -> some View {
+        let selected = coordinator.personal.wallpaper == .collection(photo)
+        return Button {
+            coordinator.personal.wallpaper = selected ? .keep : .collection(photo)
+        } label: {
+            VStack(alignment: .leading, spacing: 4) {
+                AsyncImage(url: photo.thumb) { image in
+                    image.resizable().aspectRatio(contentMode: .fill)
+                } placeholder: {
+                    Color.secondary.opacity(0.15)
+                }
+                .frame(width: 160, height: 90)
+                .clipShape(RoundedRectangle(cornerRadius: 8))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8)
+                        .strokeBorder(selected ? Color.accentColor : .clear, lineWidth: 3)
+                )
+                Text(photo.title)
+                    .font(.caption.weight(.medium))
+                    .lineLimit(1)
+                if let credit = photo.credit {
+                    Text(credit)
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                }
+            }
+            .frame(width: 160)
+        }
+        .buttonStyle(.plain)
+    }
+
+    private func chooseOwnPhoto() {
+        let panel = NSOpenPanel()
+        panel.allowedContentTypes = [.image]
+        panel.canChooseDirectories = false
+        panel.allowsMultipleSelection = false
+        panel.message = "Choose a photo for your wallpaper"
+        if panel.runModal() == .OK, let url = panel.url {
+            coordinator.personal.wallpaper = .file(url)
         }
     }
 

@@ -198,6 +198,7 @@ struct ReviewStep: View {
                 summaryRow("Folders", folders.isEmpty ? "None" : folders.joined(separator: ", "))
                 summaryRow("Screenshots", p.screenshotsFolder ? (p.screenshotsPath as NSString).abbreviatingWithTildeInPath : "Desktop")
                 summaryRow("Browser", browser ?? "No change")
+                summaryRow("Wallpaper", p.wallpaper.label)
                 summaryRow("Touch ID for sudo", touchID)
             }
         }

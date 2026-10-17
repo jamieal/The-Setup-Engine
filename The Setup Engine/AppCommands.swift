@@ -50,9 +50,9 @@ struct AppCommands: Commands {
 
     private static var aboutCredits: NSAttributedString {
         let body = """
-        A guided macOS setup workflow built with SwiftUI.
+        Set up once. Then it's gone.
 
-        Installs apps straight from their makers, checks each one with Apple, and configures system preferences, all without touching Terminal.
+        Installs your apps straight from their makers, checks each one with Apple, makes the Mac yours, hands you a receipt — and removes itself.
 
         github.com/jamieal/The-Setup-Engine
         """

@@ -1,6 +1,8 @@
 # The Setup Engine
 
-A guided macOS setup workflow built with SwiftUI. Installs apps straight from their makers, checks each one with Apple, and configures system preferences without ever touching Terminal.
+**Set up once. Then it's gone.**
+
+A personal, one-time setup for a fresh Mac. It installs your apps straight from their makers (each one checked with Apple), sets up your Dock, wallpaper, folders and Touch ID, hands you a receipt of everything it changed with an undo button, and then removes itself. No Terminal, no clutter copied over from your old Mac.
 
 ![Welcome — light & dark](screenshots/composite/01-welcome.png)
 
@@ -13,6 +15,21 @@ What started as a shell script is now this SwiftUI app that walks anyone through
 If you're setting up a brand new Mac — or wipe yours as often as I do — I hope it cuts the mundane out of it.
 
 **Requirements:** macOS 14 (Sonoma) or later, Apple Silicon or Intel. Most apps don't need Homebrew.
+
+## How it's different
+
+- **Migration Assistant** copies everything, years of clutter included. The Setup Engine rebuilds what you use on a clean Mac.
+- **Brewfiles, Strap, OpenBoot** need Terminal and dotfiles. This is a native Mac app anyone can use.
+- **Applite, Homebrew's BrewUI, Setapp** only install apps. This also does the Dock, wallpaper, folders, browser and Touch ID.
+- **Nothing else** gives you a receipt of every change, undo, a recipe to reuse or share, or removes itself when it's done.
+
+## Recipes
+
+Save a setup as a `.setuprecipe` file and use it on your next Mac, or share it:
+
+- **Save this Mac as a recipe…** (Welcome screen or File menu) records this Mac's apps, Homebrew tools, Dock, settings and default browser. It copies no files, so your next Mac starts clean.
+- **Save as recipe…** on the finish screen records the choices you just made.
+- **Use a recipe…**, File → Open Recipe… (⌘O), or drop the file on the window pre-fills every step. Everything stays editable before you press Begin Setup.
 
 ## How to use
 
